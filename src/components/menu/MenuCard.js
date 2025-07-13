@@ -47,6 +47,22 @@ const getProteinLevel = (protein) => {
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
+  // ✅ すべてのフックを最初に配置
+  const menuItems = React.useMemo(() => {
+    if (!menu?.menu?.description) return [];
+    
+    return menu.menu.description
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => 
+        line.split('　')
+          .filter(item => item.trim())
+          .map(item => item.trim())
+      )
+      .flat();
+  }, [menu?.menu?.description]);
+
+  // ✅ early returnを条件付きレンダリングに変更
   if (!menu) {
     return (
       <div className="bg-gray-100 rounded-2xl p-6 animate-pulse">
@@ -76,23 +92,6 @@ const MenuCard = ({ menu, isToday = false }) => {
   };
 
   const { day, month } = formatDate(menu.date);
-
-  // メニューアイテムを整理
-  const menuItems = React.useMemo(() => {
-    if (!menu.menu?.description) return [];
-    
-    return menu.menu.description
-      .split('\n')
-      .filter(line => line.trim())
-      .map(line => 
-        line.split('　')
-          .filter(item => item.trim())
-          .map(item => item.trim())
-      )
-      .flat();
-  }, [menu.menu?.description]);
-
-  // 特別メニューかどうか
   const isSpecial = menu.isSpecial || menu.hasSpecialMenu;
 
   return (
