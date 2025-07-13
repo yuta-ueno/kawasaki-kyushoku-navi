@@ -71,8 +71,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               >
                 {districts.map(district => (
                   <option key={district.id} value={district.id}>
-                    <span className="sm:hidden">{district.shortName}</span>
-                    <span className="hidden sm:inline">{district.name} ({district.description})</span>
+                    {district.shortName}
                   </option>
                 ))}
               </select>
@@ -97,10 +96,9 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               <div className="flex items-center space-x-1 sm:space-x-2 text-gray-600">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="font-medium">
-                  <span className="sm:hidden">{districts.find(d => d.id === selectedDistrict)?.shortName}</span>
-                  <span className="hidden sm:inline">{districts.find(d => d.id === selectedDistrict)?.name}</span>
+                  {districts.find(d => d.id === selectedDistrict)?.shortName}
                 </span>
-                <span className="text-gray-500 hidden sm:inline">
+                <span className="text-gray-500 hidden md:inline">
                   ({districts.find(d => d.id === selectedDistrict)?.description})
                 </span>
               </div>
