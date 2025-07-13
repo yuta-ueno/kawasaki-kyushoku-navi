@@ -3,9 +3,27 @@ import { ChefHat, MapPin, Calendar, Bell } from 'lucide-react';
 
 const Header = ({ selectedDistrict, setSelectedDistrict }) => {
   const districts = [
-    { id: 'A', name: '川崎区・中原区', description: '北部給食センター', area: '川崎区・中原区' },
-    { id: 'B', name: '幸区・多摩区・麻生区', description: '中部給食センター', area: '幸区・多摩区・麻生区' },
-    { id: 'C', name: '高津区・宮前区', description: '南部給食センター', area: '高津区・宮前区' }
+    { 
+      id: 'A', 
+      name: '川崎区・中原区', 
+      shortName: '川崎・中原区',
+      description: '北部給食センター', 
+      area: '川崎区・中原区' 
+    },
+    { 
+      id: 'B', 
+      name: '幸区・多摩区・麻生区', 
+      shortName: '幸・多摩・麻生区',
+      description: '中部給食センター', 
+      area: '幸区・多摩区・麻生区' 
+    },
+    { 
+      id: 'C', 
+      name: '高津区・宮前区', 
+      shortName: '高津・宮前区',
+      description: '南部給食センター', 
+      area: '高津区・宮前区' 
+    }
   ];
 
   return (
@@ -49,11 +67,11 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               <select
                 value={selectedDistrict}
                 onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 sm:px-4 sm:py-2 pr-6 sm:pr-8 text-xs sm:text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                className="appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 sm:px-4 sm:py-2 pr-6 sm:pr-8 text-xs sm:text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm max-w-[140px] sm:max-w-none"
               >
                 {districts.map(district => (
                   <option key={district.id} value={district.id}>
-                    <span className="sm:hidden">{district.name}</span>
+                    <span className="sm:hidden">{district.shortName}</span>
                     <span className="hidden sm:inline">{district.name} ({district.description})</span>
                   </option>
                 ))}
@@ -79,7 +97,8 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               <div className="flex items-center space-x-1 sm:space-x-2 text-gray-600">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="font-medium">
-                  {districts.find(d => d.id === selectedDistrict)?.name}
+                  <span className="sm:hidden">{districts.find(d => d.id === selectedDistrict)?.shortName}</span>
+                  <span className="hidden sm:inline">{districts.find(d => d.id === selectedDistrict)?.name}</span>
                 </span>
                 <span className="text-gray-500 hidden sm:inline">
                   ({districts.find(d => d.id === selectedDistrict)?.description})
