@@ -166,7 +166,7 @@ const MenuCard = ({ menu, isToday = false }) => {
         <div className="mb-4">
           <div className="flex items-center mb-3">
             <ChefHat className="w-4 h-4 text-gray-500 mr-2" />
-            <span className="text-sm font-semibold text-gray-700">今日のメニュー</span>
+            <span className="text-sm font-semibold text-gray-700">メニュー</span>
           </div>
           
           <div className="space-y-2">
