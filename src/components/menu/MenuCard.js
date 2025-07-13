@@ -15,35 +15,6 @@ const getDayColor = (dayOfWeek) => {
   return colors[dayOfWeek] || 'text-gray-600 bg-gray-50 border-gray-200';
 };
 
-// カロリーレベルの判定
-const getCalorieLevel = (calories) => {
-  if (calories >= 680) return { 
-    level: 'high', 
-    color: 'text-red-600 bg-red-50 border-red-200', 
-    label: '高カロリー',
-    icon: '🔥'
-  };
-  if (calories >= 620) return { 
-    level: 'medium', 
-    color: 'text-orange-600 bg-orange-50 border-orange-200', 
-    label: '標準',
-    icon: '⚡'
-  };
-  return { 
-    level: 'low', 
-    color: 'text-green-600 bg-green-50 border-green-200', 
-    label: '控えめ',
-    icon: '🌱'
-  };
-};
-
-// たんぱく質レベルの判定
-const getProteinLevel = (protein) => {
-  if (protein >= 30) return { color: 'text-green-600', label: '豊富' };
-  if (protein >= 25) return { color: 'text-blue-600', label: '標準' };
-  return { color: 'text-orange-600', label: '控えめ' };
-};
-
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -89,8 +60,6 @@ const MenuCard = ({ menu, isToday = false }) => {
   }
 
   const dayColor = getDayColor(menu.dayOfWeek);
-  const calorieInfo = getCalorieLevel(menu.nutrition?.energy || 0);
-  const proteinInfo = getProteinLevel(menu.nutrition?.protein || 0);
 
   // 日付フォーマット
   const formatDate = (dateStr) => {
@@ -236,18 +205,12 @@ const MenuCard = ({ menu, isToday = false }) => {
               </div>
               <div>
                 <div className="text-xs text-gray-500">たんぱく質</div>
-                <div className={`text-lg font-bold ${proteinInfo.color}`}>
+                <div className="text-lg font-bold text-green-600">
                   {menu.nutrition?.protein || 0}
                   <span className="text-xs ml-1">g</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* カロリーレベル */}
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${calorieInfo.color}`}>
-            <span className="mr-1">{calorieInfo.icon}</span>
-            {calorieInfo.label}
           </div>
         </div>
 
