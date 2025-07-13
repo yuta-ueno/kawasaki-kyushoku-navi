@@ -135,8 +135,8 @@ const MenuCard = ({ menu, isToday = false }) => {
               text-white rounded-xl px-4 py-2 shadow-md
             `}>
               <div className="text-center">
-                <div className="text-xs font-medium opacity-90">{month}月</div>
-                <div className="text-xl font-bold">{day}</div>
+                <div className="text-xs font-medium opacity-90">{dateInfo.month}月</div>
+                <div className="text-xl font-bold">{dateInfo.day}</div>
               </div>
             </div>
             <div className={`px-3 py-2 rounded-lg font-semibold text-sm border ${dayColor}`}>
