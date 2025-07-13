@@ -79,18 +79,33 @@ const MenuCard = ({ menu, isToday = false }) => {
 
   // メニューアイテムを整理
   const menuItems = React.useMemo(() => {
+    // 新しいデータ構造では menu.items 配列を優先的に使用
+    if (menu.menu?.items && Array.isArray(menu.menu.items)) {
+      // 牛乳以外のアイテムを取得
+      return menu.menu.items.filter(item => item && item.trim() !== 'ぎゅうにゅう');
+    }
+    
+    // フォールバック: 古いデータ構造の場合
     if (!menu.menu?.description) return [];
     
-    return menu.menu.description
-      .split('\n')
-      .filter(line => line.trim())
-      .map(line => 
-        line.split('　')
-          .filter(item => item.trim())
-          .map(item => item.trim())
-      )
-      .flat();
-  }, [menu.menu?.description]);
+    // まず改行で分割
+    const lines = menu.menu.description.split('\n').filter(line => line.trim());
+    
+    // 各行を全角・半角スペースで分割し、さらに細かく分ける
+    const allItems = [];
+    lines.forEach(line => {
+      // 全角スペースと半角スペースで分割
+      const spaceSplit = line.split(/[\s　]+/).filter(item => item.trim());
+      spaceSplit.forEach(item => {
+        const trimmed = item.trim();
+        if (trimmed && trimmed !== 'ぎゅうにゅう') {
+          allItems.push(trimmed);
+        }
+      });
+    });
+    
+    return allItems;
+  }, [menu.menu?.items, menu.menu?.description]);
 
   // 特別メニューかどうか
   const isSpecial = menu.isSpecial || menu.hasSpecialMenu;
@@ -135,8 +150,8 @@ const MenuCard = ({ menu, isToday = false }) => {
               text-white rounded-xl px-4 py-2 shadow-md
             `}>
               <div className="text-center">
-                <div className="text-xs font-medium opacity-90">{dateInfo.month}月</div>
-                <div className="text-xl font-bold">{dateInfo.day}</div>
+                <div className="text-xs font-medium opacity-90">{month}月</div>
+                <div className="text-xl font-bold">{day}</div>
               </div>
             </div>
             <div className={`px-3 py-2 rounded-lg font-semibold text-sm border ${dayColor}`}>
@@ -153,19 +168,25 @@ const MenuCard = ({ menu, isToday = false }) => {
           </div>
           
           <div className="space-y-2">
-            {menuItems.slice(0, isExpanded ? menuItems.length : 4).map((item, index) => (
-              <div key={index} className="flex items-center text-sm text-gray-800">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0"></div>
+            {menuItems.slice(0, isExpanded ? menuItems.length : 3).map((item, index) => (
+              <div key={index} className="flex items-start text-sm text-gray-800">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0 mt-2"></div>
                 <span className="leading-relaxed">{item}</span>
               </div>
             ))}
             
-            {menuItems.length > 4 && (
+            {/* 牛乳は常に表示（データから取得または固定表示） */}
+            <div className="flex items-start text-sm text-gray-800">
+              <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0 mt-2"></div>
+              <span className="leading-relaxed">ぎゅうにゅう</span>
+            </div>
+            
+            {menuItems.length > 3 && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center mt-2"
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center mt-2 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
               >
-                {isExpanded ? '簡略表示' : `他${menuItems.length - 4}品目を表示`}
+                {isExpanded ? '簡略表示' : `他${menuItems.length - 3}品目を表示`}
                 <Info className="w-3 h-3 ml-1" />
               </button>
             )}
