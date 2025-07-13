@@ -47,6 +47,38 @@ const getProteinLevel = (protein) => {
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
+  // メニューアイテムを整理 - React Hookはearly returnの前に配置
+  const menuItems = React.useMemo(() => {
+    if (!menu) return [];
+    
+    // 新しいデータ構造では menu.items 配列を優先的に使用
+    if (menu.menu?.items && Array.isArray(menu.menu.items)) {
+      // 牛乳以外のアイテムを取得
+      return menu.menu.items.filter(item => item && item.trim() !== 'ぎゅうにゅう');
+    }
+    
+    // フォールバック: 古いデータ構造の場合
+    if (!menu.menu?.description) return [];
+    
+    // まず改行で分割
+    const lines = menu.menu.description.split('\n').filter(line => line.trim());
+    
+    // 各行を全角・半角スペースで分割し、さらに細かく分ける
+    const allItems = [];
+    lines.forEach(line => {
+      // 全角スペースと半角スペースで分割
+      const spaceSplit = line.split(/[\s　]+/).filter(item => item.trim());
+      spaceSplit.forEach(item => {
+        const trimmed = item.trim();
+        if (trimmed && trimmed !== 'ぎゅうにゅう') {
+          allItems.push(trimmed);
+        }
+      });
+    });
+    
+    return allItems;
+  }, [menu?.menu?.items, menu?.menu?.description]);
+  
   if (!menu) {
     return (
       <div className="bg-gray-100 rounded-2xl p-6 animate-pulse">
@@ -76,36 +108,6 @@ const MenuCard = ({ menu, isToday = false }) => {
   };
 
   const { day, month } = formatDate(menu.date);
-
-  // メニューアイテムを整理
-  const menuItems = React.useMemo(() => {
-    // 新しいデータ構造では menu.items 配列を優先的に使用
-    if (menu.menu?.items && Array.isArray(menu.menu.items)) {
-      // 牛乳以外のアイテムを取得
-      return menu.menu.items.filter(item => item && item.trim() !== 'ぎゅうにゅう');
-    }
-    
-    // フォールバック: 古いデータ構造の場合
-    if (!menu.menu?.description) return [];
-    
-    // まず改行で分割
-    const lines = menu.menu.description.split('\n').filter(line => line.trim());
-    
-    // 各行を全角・半角スペースで分割し、さらに細かく分ける
-    const allItems = [];
-    lines.forEach(line => {
-      // 全角スペースと半角スペースで分割
-      const spaceSplit = line.split(/[\s　]+/).filter(item => item.trim());
-      spaceSplit.forEach(item => {
-        const trimmed = item.trim();
-        if (trimmed && trimmed !== 'ぎゅうにゅう') {
-          allItems.push(trimmed);
-        }
-      });
-    });
-    
-    return allItems;
-  }, [menu.menu?.items, menu.menu?.description]);
 
   // 特別メニューかどうか
   const isSpecial = menu.isSpecial || menu.hasSpecialMenu;
