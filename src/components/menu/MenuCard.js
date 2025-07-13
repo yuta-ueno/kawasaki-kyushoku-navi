@@ -47,22 +47,6 @@ const getProteinLevel = (protein) => {
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // ✅ すべてのフックを最初に配置
-  const menuItems = React.useMemo(() => {
-    if (!menu?.menu?.description) return [];
-    
-    return menu.menu.description
-      .split('\n')
-      .filter(line => line.trim())
-      .map(line => 
-        line.split('　')
-          .filter(item => item.trim())
-          .map(item => item.trim())
-      )
-      .flat();
-  }, [menu?.menu?.description]);
-
-  // ✅ early returnを条件付きレンダリングに変更
   if (!menu) {
     return (
       <div className="bg-gray-100 rounded-2xl p-6 animate-pulse">
@@ -92,6 +76,23 @@ const MenuCard = ({ menu, isToday = false }) => {
   };
 
   const { day, month } = formatDate(menu.date);
+
+  // メニューアイテムを整理
+  const menuItems = React.useMemo(() => {
+    if (!menu.menu?.description) return [];
+    
+    return menu.menu.description
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => 
+        line.split('　')
+          .filter(item => item.trim())
+          .map(item => item.trim())
+      )
+      .flat();
+  }, [menu.menu?.description]);
+
+  // 特別メニューかどうか
   const isSpecial = menu.isSpecial || menu.hasSpecialMenu;
 
   return (
@@ -169,6 +170,21 @@ const MenuCard = ({ menu, isToday = false }) => {
               </button>
             )}
           </div>
+
+          {/* 学習ポイント（notes）の表示 */}
+          {menu.notes && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="flex items-start space-x-2">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-blue-600 text-xs">📚</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-blue-700 mb-1">今日の学習ポイント</div>
+                  <div className="text-xs text-blue-600 leading-relaxed">{menu.notes}</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
