@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- トップページ（最重要） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 献立表示ページ（メイン機能） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/menu</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- カレンダーページ（メイン機能） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/calendar</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学校選択ページ -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/schools</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- アプリについてページ -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/about</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- 今日の献立（直接アクセス用） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/today</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 明日の献立（直接アクセス用） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/tomorrow</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 川崎市A地区（北部給食センター） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/district/a</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 川崎市B地区（中部給食センター） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/district/b</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 川崎市C地区（南部給食センター） -->
+  <url>
+    <loc>https://kawasaki-kyushoku.jp/district/c</loc>
+    <lastmod>2025-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>
