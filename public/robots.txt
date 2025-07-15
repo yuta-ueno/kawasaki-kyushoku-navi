@@ -1,0 +1,60 @@
+# かわさき給食ナビ - robots.txt
+# 川崎市の給食献立情報サービス
+
+# 全てのクローラーに対する基本設定
+User-agent: *
+Allow: /
+
+# サイトマップの場所（重要）
+Sitemap: https://kawasaki-kyushoku.jp/sitemap.xml
+
+# クロール頻度の調整（サーバー負荷軽減）
+Crawl-delay: 1
+
+# 管理・API関連の除外（セキュリティ・パフォーマンス重視）
+Disallow: /admin/
+Disallow: /api/auth/
+Disallow: /api/internal/
+Disallow: /api/admin/
+
+# 一般的なAPIエンドポイントは部分的に許可
+Allow: /api/menu/
+Allow: /api/schools/
+Allow: /api/health
+Allow: /api/sitemap.xml
+
+# 開発・テスト用ファイルの除外
+Disallow: /test/
+Disallow: /_next/static/
+Disallow: /.well-known/
+
+# 重複コンテンツの除外
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?source=*
+
+# 主要検索エンジンの個別設定
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# SNSクローラー（Open Graph用）
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# 悪質なボット・スクレイピング対策
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
