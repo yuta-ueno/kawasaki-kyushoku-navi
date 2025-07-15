@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase/config';
 
+// JST基準で今日の日付を取得するヘルパー関数
+const getTodayJST = () => {
+  const now = new Date();
+  const jstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9時間
+  return jstDate.toISOString().split('T')[0];
+};
+
 // 今日の献立を取得
 export const useTodayMenu = (district = 'A') => {
   const [menu, setMenu] = useState(null);
@@ -12,7 +19,8 @@ export const useTodayMenu = (district = 'A') => {
     const fetchTodayMenu = async () => {
       try {
         setLoading(true);
-        const today = new Date().toISOString().split('T')[0];
+        // ここだけ変更: UTC → JST基準
+        const today = getTodayJST();
         const docId = `${today}-${district}`;
         const docRef = doc(db, 'kawasaki_menus', docId);
         const docSnap = await getDoc(docRef);
@@ -38,7 +46,7 @@ export const useTodayMenu = (district = 'A') => {
   return { menu, loading, error };
 };
 
-// 月間献立一覧を取得
+// 月間献立一覧を取得（変更なし）
 export const useMonthlyMenus = (year = 2025, month = 7, district = 'A') => {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
