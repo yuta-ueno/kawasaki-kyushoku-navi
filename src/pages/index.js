@@ -108,7 +108,7 @@ export default function HomePage() {
         />
       </Head>
 
-       <div className="min-h-screen bg-gradient-to-br from-blue-300 via-slate-300 to-cyan-200">
+       <div className="min-h-screen bg-gradient-to-br from-blue-200 via-slate-200 to-cyan-200">
         {/* ヘッダー */}
         <Header selectedDistrict={selectedDistrict} setSelectedDistrict={setSelectedDistrict} />
 
