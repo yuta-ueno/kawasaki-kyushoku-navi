@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Star, ChefHat, Apple, Utensils, Sparkles, Info } from 'lucide-react';
 
-// 曜日の色分け
+// 曜日の色分け - ユニバーサルデザイン配慮（色覚障害対応）
 const getDayColor = (dayOfWeek) => {
   const colors = {
-    '月': 'text-blue-600 bg-blue-50 border-blue-200',
-    '火': 'text-pink-600 bg-pink-50 border-pink-200', 
-    '水': 'text-green-600 bg-green-50 border-green-200',
-    '木': 'text-orange-600 bg-orange-50 border-orange-200',
-    '金': 'text-purple-600 bg-purple-50 border-purple-200',
-    '土': 'text-indigo-600 bg-indigo-50 border-indigo-200',
-    '日': 'text-red-600 bg-red-50 border-red-200'
+    '月': 'text-slate-700 bg-slate-100 border-slate-300',
+    '火': 'text-blue-700 bg-blue-100 border-blue-300', 
+    '水': 'text-teal-700 bg-teal-100 border-teal-300',
+    '木': 'text-amber-700 bg-amber-100 border-amber-300',
+    '金': 'text-indigo-700 bg-indigo-100 border-indigo-300',
+    '土': 'text-purple-700 bg-purple-100 border-purple-300',
+    '日': 'text-rose-700 bg-rose-100 border-rose-300'
   };
-  return colors[dayOfWeek] || 'text-gray-600 bg-gray-50 border-gray-200';
+  return colors[dayOfWeek] || 'text-gray-700 bg-gray-100 border-gray-300';
+};
+
+// ユニバーサルデザイン用のアイコンマッピング
+const getDayIcon = (dayOfWeek) => {
+  const icons = {
+    '月': '🌙',
+    '火': '🔥',
+    '水': '💧',
+    '木': '🌳',
+    '金': '⭐',
+    '土': '🏔️',
+    '日': '☀️'
+  };
+  return icons[dayOfWeek] || '📅';
 };
 
 const MenuCard = ({ menu, isToday = false }) => {
@@ -52,7 +66,7 @@ const MenuCard = ({ menu, isToday = false }) => {
   
   if (!menu) {
     return (
-      <div className="bg-gray-100 rounded-2xl p-6 animate-pulse">
+      <div className="bg-gray-100 rounded-2xl p-6 animate-pulse" role="status" aria-label="読み込み中">
         <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
         <div className="h-4 bg-gray-300 rounded w-1/2"></div>
       </div>
@@ -60,6 +74,7 @@ const MenuCard = ({ menu, isToday = false }) => {
   }
 
   const dayColor = getDayColor(menu.dayOfWeek);
+  const dayIcon = getDayIcon(menu.dayOfWeek);
 
   // 日付フォーマット
   const formatDate = (dateStr) => {
@@ -82,97 +97,122 @@ const MenuCard = ({ menu, isToday = false }) => {
   const isSpecial = menu.isSpecial || menu.hasSpecialMenu;
 
   return (
-    <div className={`
-      bg-white rounded-2xl shadow-lg hover:shadow-xl 
-      transition-all duration-300 transform hover:-translate-y-1 
-      border border-gray-100 overflow-hidden
-      ${isToday ? 'ring-2 ring-orange-400 ring-offset-2 bg-gradient-to-br from-orange-50 to-yellow-50' : ''}
-    `}>
+    <article 
+      className={`
+        bg-white rounded-2xl shadow-md hover:shadow-lg 
+        transition-all duration-300 transform hover:-translate-y-1 
+        border-2 overflow-hidden focus-within:ring-4 focus-within:ring-blue-300
+        ${isToday ? 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50' : 'border-gray-200'}
+      `}
+      role="article"
+      aria-label={`${menu.date}の給食献立`}
+    >
       {/* ヘッダー部分 */}
       <div className="relative p-6 pb-4">
-        {/* 今日のバッジ */}
+        {/* 今日のバッジ - 高コントラスト */}
         {isToday && (
           <div className="absolute top-4 left-4">
-            <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-lg animate-pulse">
-              <Sparkles className="w-3 h-3 mr-1" />
-              今日の給食
+            <div 
+              className="bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-lg border-2 border-amber-700"
+              role="status"
+              aria-label="本日の給食"
+            >
+              <Sparkles className="w-4 h-4 mr-2" aria-hidden="true" />
+              <span>今日の給食</span>
             </div>
           </div>
         )}
 
-        {/* 特別メニューバッジ */}
+        {/* 特別メニューバッジ - 高コントラスト */}
         {isSpecial && (
           <div className={`absolute top-4 ${isToday ? 'right-4' : 'right-4'}`}>
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-lg">
-              <Star className="w-3 h-3 mr-1" />
-              特別メニュー
+            <div 
+              className="bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-lg border-2 border-orange-700"
+              role="status"
+              aria-label="特別メニュー"
+            >
+              <Star className="w-4 h-4 mr-2" aria-hidden="true" />
+              <span>特別メニュー</span>
             </div>
           </div>
         )}
 
-        {/* 日付表示 */}
-        <div className={`flex items-center mb-4 ${isToday || isSpecial ? 'mt-8' : ''}`}>
-          <div className="flex items-center space-x-3">
-            <div className={`
-              ${isToday 
-                ? 'bg-gradient-to-br from-orange-500 to-red-500' 
-                : 'bg-gradient-to-br from-blue-500 to-blue-600'
-              } 
-              text-white rounded-xl px-4 py-2 shadow-md
-            `}>
+        {/* 日付表示 - 高コントラスト・アクセシブル */}
+        <div className={`flex items-center mb-6 ${isToday || isSpecial ? 'mt-12' : ''}`}>
+          <div className="flex items-center space-x-4">
+            <div 
+              className={`
+                ${isToday 
+                  ? 'bg-amber-700 border-amber-800' 
+                  : 'bg-gray-700 border-gray-800'
+                } 
+                text-white rounded-xl px-4 py-3 shadow-lg border-2
+              `}
+              role="img"
+              aria-label={`${month}月${day}日`}
+            >
               <div className="text-center">
-                <div className="text-xs font-medium opacity-90">{month}月</div>
-                <div className="text-xl font-bold">{day}</div>
+                <div className="text-xs font-medium">{month}月</div>
+                <div className="text-2xl font-bold">{day}</div>
               </div>
             </div>
-            <div className={`px-3 py-2 rounded-lg font-semibold text-sm border ${dayColor}`}>
-              {menu.dayOfWeek}曜日
+            <div 
+              className={`px-4 py-2 rounded-lg font-bold text-base border-2 ${dayColor} flex items-center space-x-2`}
+              role="img"
+              aria-label={`${menu.dayOfWeek}曜日`}
+            >
+              <span className="text-lg" aria-hidden="true">{dayIcon}</span>
+              <span>{menu.dayOfWeek}曜日</span>
             </div>
           </div>
         </div>
 
-        {/* メニュー内容 */}
+        {/* メニュー内容 - アクセシブルな構造 */}
         <div className="mb-4">
-          <div className="flex items-center mb-3">
-            <ChefHat className="w-4 h-4 text-gray-500 mr-2" />
-            <span className="text-sm font-semibold text-gray-700">メニュー</span>
+          <div className="flex items-center mb-4">
+            <ChefHat className="w-5 h-5 text-gray-700 mr-3" aria-hidden="true" />
+            <h3 className="text-lg font-bold text-gray-800">本日のメニュー</h3>
           </div>
           
-          <div className="space-y-2">
+          <ul className="space-y-3" role="list">
             {menuItems.slice(0, isExpanded ? menuItems.length : 3).map((item, index) => (
-              <div key={index} className="flex items-start text-sm text-gray-800">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0 mt-2"></div>
-                <span className="leading-relaxed">{item}</span>
-              </div>
+              <li key={index} className="flex items-start text-base text-gray-800" role="listitem">
+                <div className="w-3 h-3 bg-blue-600 rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
+                <span className="leading-relaxed font-medium">{item}</span>
+              </li>
             ))}
             
-            {/* 牛乳は常に表示（データから取得または固定表示） */}
-            <div className="flex items-start text-sm text-gray-800">
-              <div className="w-2 h-2 bg-blue-400 rounded-full mr-3 flex-shrink-0 mt-2"></div>
-              <span className="leading-relaxed">ぎゅうにゅう</span>
-            </div>
+            {/* 牛乳は常に表示 */}
+            <li className="flex items-start text-base text-gray-800" role="listitem">
+              <div className="w-3 h-3 bg-blue-600 rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
+              <span className="leading-relaxed font-medium">ぎゅうにゅう</span>
+            </li>
             
             {menuItems.length > 3 && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center mt-2 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
-              >
-                {isExpanded ? '簡略表示' : `他${menuItems.length - 3}品目を表示`}
-                <Info className="w-3 h-3 ml-1" />
-              </button>
+              <li>
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-base text-blue-700 hover:text-blue-900 font-bold flex items-center mt-3 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors border-2 border-blue-300 hover:border-blue-500 focus:ring-4 focus:ring-blue-300"
+                  aria-expanded={isExpanded}
+                  aria-controls="menu-items-list"
+                >
+                  {isExpanded ? '簡略表示する' : `他${menuItems.length - 3}品目を表示する`}
+                  <Info className="w-4 h-4 ml-2" aria-hidden="true" />
+                </button>
+              </li>
             )}
-          </div>
+          </ul>
 
-          {/* 学習ポイント（notes）の表示 */}
+          {/* 学習ポイント（notes）の表示 - アクセシブル */}
           {menu.notes && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-              <div className="flex items-start space-x-2">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-blue-600 text-xs">📚</span>
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200" role="region" aria-labelledby="learning-point-title">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1" aria-hidden="true">
+                  <span className="text-blue-700 text-sm">📚</span>
                 </div>
                 <div className="flex-1">
-                  <div className="text-xs font-medium text-blue-700 mb-1">今日の学習ポイント</div>
-                  <div className="text-xs text-blue-600 leading-relaxed">{menu.notes}</div>
+                  <h4 id="learning-point-title" className="text-sm font-bold text-blue-800 mb-2">今日の学習ポイント</h4>
+                  <p className="text-sm text-blue-700 leading-relaxed">{menu.notes}</p>
                 </div>
               </div>
             </div>
@@ -180,53 +220,53 @@ const MenuCard = ({ menu, isToday = false }) => {
         </div>
       </div>
 
-      {/* 栄養情報フッター */}
-      <div className="bg-gray-50 px-6 py-4">
+      {/* 栄養情報フッター - 高コントラスト・アクセシブル */}
+      <footer className="bg-gray-100 px-6 py-5 border-t-2 border-gray-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {/* カロリー */}
-            <div className="flex items-center space-x-2">
-              <div className="bg-orange-100 p-2 rounded-lg">
-                <Apple className="w-4 h-4 text-orange-600" />
+          <div className="flex items-center space-x-6">
+            {/* カロリー - 高コントラスト */}
+            <div className="flex items-center space-x-3" role="group" aria-labelledby="calorie-label">
+              <div className="bg-orange-200 p-3 rounded-lg border-2 border-orange-300" aria-hidden="true">
+                <Apple className="w-5 h-5 text-orange-700" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">エネルギー</div>
-                <div className="text-lg font-bold text-orange-600">
+                <div id="calorie-label" className="text-sm font-medium text-gray-700">エネルギー</div>
+                <div className="text-xl font-bold text-orange-700">
                   {Math.round(menu.nutrition?.energy || 0)}
-                  <span className="text-xs ml-1">kcal</span>
+                  <span className="text-sm ml-1">kcal</span>
                 </div>
               </div>
             </div>
 
-            {/* たんぱく質 */}
-            <div className="flex items-center space-x-2">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <Utensils className="w-4 h-4 text-green-600" />
+            {/* たんぱく質 - 高コントラスト */}
+            <div className="flex items-center space-x-3" role="group" aria-labelledby="protein-label">
+              <div className="bg-teal-200 p-3 rounded-lg border-2 border-teal-300" aria-hidden="true">
+                <Utensils className="w-5 h-5 text-teal-700" />
               </div>
               <div>
-                <div className="text-xs text-gray-500">たんぱく質</div>
-                <div className="text-lg font-bold text-green-600">
+                <div id="protein-label" className="text-sm font-medium text-gray-700">たんぱく質</div>
+                <div className="text-xl font-bold text-teal-700">
                   {menu.nutrition?.protein || 0}
-                  <span className="text-xs ml-1">g</span>
+                  <span className="text-sm ml-1">g</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 追加情報 */}
-        <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+        {/* 追加情報 - アクセシブル */}
+        <div className="mt-4 pt-4 border-t-2 border-gray-300 flex items-center justify-between text-sm text-gray-700 font-medium">
           <div className="flex items-center space-x-4">
-            <span>📍 {menu.district}地区</span>
-            {menu.schoolType && <span>🏫 {menu.schoolType}</span>}
+            <span role="img" aria-label={`${menu.district}地区`}>📍 {menu.district}地区</span>
+            {menu.schoolType && <span role="img" aria-label={menu.schoolType}>🏫 {menu.schoolType}</span>}
           </div>
-          <div className="flex items-center space-x-1">
-            <Clock className="w-3 h-3" />
-            <span>{menu.date}</span>
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4" aria-hidden="true" />
+            <time dateTime={menu.date}>{menu.date}</time>
           </div>
         </div>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 };
 
