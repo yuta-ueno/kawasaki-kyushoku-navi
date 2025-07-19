@@ -52,6 +52,19 @@ export default function HomePage() {
     <>
       {/* SEO最適化 - 追加部分 */}
       <Head>
+        {/* Google Analytics */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKM38HXTKS"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-BKM38HXTKS');
+            `,
+          }}
+        />
+      
         <title>川崎市の給食献立情報 | かわさき給食ナビ - 今日の学校給食をスマホで簡単チェック</title>
         <meta 
           name="description" 
@@ -107,18 +120,6 @@ export default function HomePage() {
           }}
         />
       </Head>
-
-
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKM38HXTKS"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-BKM38HXTKS');
-        </script>
-
 
        <div className="min-h-screen bg-gradient-to-br from-blue-200 via-slate-200 to-cyan-200">
         {/* ヘッダー */}
