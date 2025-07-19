@@ -15,20 +15,6 @@ const getDayColor = (dayOfWeek) => {
   return colors[dayOfWeek] || 'text-gray-700 bg-gray-100 border-gray-300';
 };
 
-// ユニバーサルデザイン用のアイコンマッピング
-const getDayIcon = (dayOfWeek) => {
-  const icons = {
-    '月': '🌙',
-    '火': '🔥',
-    '水': '💧',
-    '木': '🌳',
-    '金': '⭐',
-    '土': '🏔️',
-    '日': '☀️'
-  };
-  return icons[dayOfWeek] || '📅';
-};
-
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -74,7 +60,6 @@ const MenuCard = ({ menu, isToday = false }) => {
   }
 
   const dayColor = getDayColor(menu.dayOfWeek);
-  const dayIcon = getDayIcon(menu.dayOfWeek);
 
   // 日付フォーマット
   const formatDate = (dateStr) => {
@@ -99,10 +84,15 @@ const MenuCard = ({ menu, isToday = false }) => {
   return (
     <article 
       className={`
-        bg-white rounded-2xl shadow-md hover:shadow-lg 
+        ${isToday 
+          ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-400' 
+          : (menu.dayOfWeek === '土' || menu.dayOfWeek === '日') 
+            ? 'bg-yellow-50 border-yellow-300' 
+            : 'bg-yellow-50 border-gray-300'
+        }
+        rounded-2xl shadow-md hover:shadow-lg 
         transition-all duration-300 transform hover:-translate-y-1 
         border-2 overflow-hidden focus-within:ring-4 focus-within:ring-blue-300
-        ${isToday ? 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50' : 'border-gray-200'}
       `}
       role="article"
       aria-label={`${menu.date}の給食献立`}
@@ -137,32 +127,25 @@ const MenuCard = ({ menu, isToday = false }) => {
           </div>
         )}
 
-        {/* 日付表示 - 高コントラスト・アクセシブル */}
+        {/* 日付・曜日表示（一体化） - 高コントラスト・アクセシブル */}
         <div className={`flex items-center mb-6 ${isToday || isSpecial ? 'mt-12' : ''}`}>
-          <div className="flex items-center space-x-4">
-            <div 
-              className={`
-                ${isToday 
-                  ? 'bg-amber-700 border-amber-800' 
-                  : 'bg-gray-700 border-gray-800'
-                } 
-                text-white rounded-xl px-4 py-3 shadow-lg border-2
-              `}
-              role="img"
-              aria-label={`${month}月${day}日`}
-            >
-              <div className="text-center">
-                <div className="text-xs font-medium">{month}月</div>
-                <div className="text-2xl font-bold">{day}</div>
-              </div>
+          <div 
+            className={`
+              ${isToday 
+                ? 'bg-amber-700 border-amber-800' 
+                : 'bg-gray-700 border-gray-800'
+              } 
+              text-white rounded-xl px-6 py-4 shadow-lg border-2 flex items-center space-x-4
+            `}
+            role="img"
+            aria-label={`${month}月${day}日 ${menu.dayOfWeek}曜日`}
+          >
+            <div className="text-center">
+              <div className="text-xs font-medium">{month}月</div>
+              <div className="text-2xl font-bold">{day}</div>
             </div>
-            <div 
-              className={`px-4 py-2 rounded-lg font-bold text-base border-2 ${dayColor} flex items-center space-x-2`}
-              role="img"
-              aria-label={`${menu.dayOfWeek}曜日`}
-            >
-              <span className="text-lg" aria-hidden="true">{dayIcon}</span>
-              <span>{menu.dayOfWeek}曜日</span>
+            <div className="text-base font-bold">
+              {menu.dayOfWeek}曜日
             </div>
           </div>
         </div>
