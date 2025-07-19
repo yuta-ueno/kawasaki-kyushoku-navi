@@ -133,7 +133,7 @@ const MenuCard = ({ menu, isToday = false }) => {
             className={`
               ${isToday 
                 ? 'bg-amber-700 border-amber-800' 
-                : 'bg-gray-700 border-gray-800'
+                : 'bg-blue-600 border-gray-600'
               } 
               text-white rounded-xl px-6 py-4 shadow-lg border-2 flex items-center space-x-4
             `}
@@ -141,8 +141,8 @@ const MenuCard = ({ menu, isToday = false }) => {
             aria-label={`${month}月${day}日 ${menu.dayOfWeek}曜日`}
           >
             <div className="text-center">
-              <div className="text-xs font-medium">{month}月</div>
-              <div className="text-2xl font-bold">{day}</div>
+              
+              <div className="text-2xl font-bold">{day}日</div>
             </div>
             <div className="text-base font-bold">
               {menu.dayOfWeek}曜日
@@ -154,21 +154,21 @@ const MenuCard = ({ menu, isToday = false }) => {
         <div className="mb-4">
           <div className="flex items-center mb-4">
             <ChefHat className="w-5 h-5 text-gray-700 mr-3" aria-hidden="true" />
-            <h3 className="text-lg font-bold text-gray-800">本日のメニュー</h3>
+            <h3 className="text-lg font-bold text-gray-800">メニュー</h3>
           </div>
           
           <ul className="space-y-3" role="list">
             {menuItems.slice(0, isExpanded ? menuItems.length : 3).map((item, index) => (
               <li key={index} className="flex items-start text-base text-gray-800" role="listitem">
                 <div className="w-3 h-3 bg-blue-600 rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
-                <span className="leading-relaxed font-medium">{item}</span>
+                <span className="leading-relaxed font-bold">{item}</span>
               </li>
             ))}
             
             {/* 牛乳は常に表示 */}
             <li className="flex items-start text-base text-gray-800" role="listitem">
               <div className="w-3 h-3 bg-blue-600 rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
-              <span className="leading-relaxed font-medium">ぎゅうにゅう</span>
+              <span className="leading-relaxed font-bold">ぎゅうにゅう</span>
             </li>
             
             {menuItems.length > 3 && (
@@ -213,7 +213,7 @@ const MenuCard = ({ menu, isToday = false }) => {
                 <Apple className="w-5 h-5 text-orange-700" />
               </div>
               <div>
-                <div id="calorie-label" className="text-sm font-medium text-gray-700">エネルギー</div>
+                <div id="calorie-label" className="text-xs font-medium text-gray-700">エネルギー</div>
                 <div className="text-xl font-bold text-orange-700">
                   {Math.round(menu.nutrition?.energy || 0)}
                   <span className="text-sm ml-1">kcal</span>
@@ -227,7 +227,7 @@ const MenuCard = ({ menu, isToday = false }) => {
                 <Utensils className="w-5 h-5 text-teal-700" />
               </div>
               <div>
-                <div id="protein-label" className="text-sm font-medium text-gray-700">たんぱく質</div>
+                <div id="protein-label" className="text-xs font-medium text-gray-700">たんぱく質</div>
                 <div className="text-xl font-bold text-teal-700">
                   {menu.nutrition?.protein || 0}
                   <span className="text-sm ml-1">g</span>
