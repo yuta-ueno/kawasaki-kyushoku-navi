@@ -108,6 +108,18 @@ export default function HomePage() {
         />
       </Head>
 
+
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKM38HXTKS"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-BKM38HXTKS');
+        </script>
+
+
        <div className="min-h-screen bg-gradient-to-br from-blue-200 via-slate-200 to-cyan-200">
         {/* ヘッダー */}
         <Header selectedDistrict={selectedDistrict} setSelectedDistrict={setSelectedDistrict} />
