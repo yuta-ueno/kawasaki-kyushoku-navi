@@ -167,7 +167,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   {/* SEO最適化: h2タグ追加 */}
-                  <h2 className="text-3xl font-bold text-gray-900">2025年7月の給食献立</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">2025年7月の給食献立</h2>
                   <p className="text-gray-600">川崎市{selectedDistrict}地区小学校の献立表</p>
                 </div>
               </div>
