@@ -93,12 +93,13 @@ const MenuCard = ({ menu, isToday = false }) => {
         rounded-2xl shadow-md hover:shadow-lg 
         transition-all duration-300 transform hover:-translate-y-1 
         border-2 overflow-hidden focus-within:ring-4 focus-within:ring-blue-300
+        flex flex-col min-h-[420px]
       `}
       role="article"
       aria-label={`${menu.date}の給食献立`}
     >
       {/* ヘッダー部分 */}
-      <div className="relative p-6 pb-4">
+      <div className="relative p-6 pb-4 flex-grow">
         {/* 今日のバッジ - 高コントラスト */}
         {isToday && (
           <div className="absolute top-4 left-4">
@@ -204,7 +205,7 @@ const MenuCard = ({ menu, isToday = false }) => {
       </div>
 
       {/* 栄養情報フッター - 高コントラスト・アクセシブル */}
-      <footer className="bg-gray-100 px-6 py-5 border-t-2 border-gray-200">
+      <footer className="bg-gray-100 px-6 py-5 border-t-2 border-gray-200 mt-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             {/* カロリー - 高コントラスト */}
