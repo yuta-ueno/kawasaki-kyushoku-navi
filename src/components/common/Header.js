@@ -62,24 +62,6 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               </span>
             </div>
 
-            {/* 地区選択 */}
-            <div className="relative">
-              <select
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 sm:px-4 sm:py-2 pr-6 sm:pr-8 text-xs sm:text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm max-w-[140px] sm:max-w-none"
-              >
-                {districts.map(district => (
-                  <option key={district.id} value={district.id}>
-                    {district.shortName}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-1 sm:px-2 pointer-events-none">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-              </div>
-            </div>
-
             {/* 通知アイコン（将来機能用） */}
             <button className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -88,22 +70,44 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
         </div>
       </div>
 
-      {/* サブヘッダー（選択地区の詳細情報） */}
+      {/* サブヘッダー（地区選択 + 選択地区の詳細情報） */}
       <div className="bg-gray-50 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-10 sm:h-12">
-            <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm">
-              <div className="flex items-center space-x-1 sm:space-x-2 text-gray-600">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+          <div className="flex items-center justify-between h-12 sm:h-14">
+            {/* 左側：地区選択 */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {/* 地区選択セレクトボックス */}
+              <div className="relative">
+                <select
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-8 sm:pr-10 text-sm sm:text-base font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm min-w-[160px] sm:min-w-[200px]"
+                  aria-label="給食センター地区を選択"
+                >
+                  {districts.map(district => (
+                    <option key={district.id} value={district.id}>
+                      {district.shortName}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 pointer-events-none">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                </div>
+              </div>
+
+              {/* 選択中の地区詳細情報 */}
+              <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
                 <span className="font-medium">
-                  {districts.find(d => d.id === selectedDistrict)?.shortName}
+                  {districts.find(d => d.id === selectedDistrict)?.description}
                 </span>
+                <span className="text-gray-400 hidden md:inline">•</span>
                 <span className="text-gray-500 hidden md:inline">
-                  ({districts.find(d => d.id === selectedDistrict)?.description})
+                  対象エリア: {districts.find(d => d.id === selectedDistrict)?.area}
                 </span>
               </div>
             </div>
             
+            {/* 右側：データ提供情報 */}
             <div className="flex items-center space-x-2 sm:space-x-4 text-xs text-gray-500">
               <span className="hidden sm:inline">データ提供: 川崎市教育委員会</span>
               <span className="hidden sm:inline">•</span>
