@@ -149,7 +149,7 @@ const NotificationPopup = ({ isOpen, onClose }) => {
         <div className="p-4 bg-gray-50 border-t border-gray-200">
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              川崎市教育委員会 学校給食課
+              かわさき給食ナビ開発チーム
             </p>
             <p className="text-xs text-gray-500 mt-1">
               最新情報は川崎市公式サイトでもご確認いただけます
