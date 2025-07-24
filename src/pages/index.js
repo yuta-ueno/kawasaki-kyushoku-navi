@@ -249,7 +249,7 @@ export default function HomePage() {
                     データ提供: 川崎市教育委員会 | 
                     アプリ開発: かわさき給食ナビ開発チーム | 
                     最終更新: 2025年7月12日 | 
-                    お問い合わせ: <a href="mailto:contact@kawasaki-kyushoku.jp" className="text-blue-600 hover:text-blue-800 underline">contact@kawasaki-kyushoku.jp</a>
+                    お問い合わせ: contact@kawasaki-kyushoku.jp
                   </p>
                 </div>
               </div>
