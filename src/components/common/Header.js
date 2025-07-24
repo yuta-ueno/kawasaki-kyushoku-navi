@@ -171,21 +171,21 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
       id: 'A', 
       name: '川崎区・中原区', 
       shortName: '川崎・中原区',
-      description: '北部給食センター', 
+      description: 'A地区', 
       area: '川崎区・中原区' 
     },
     { 
       id: 'B', 
       name: '幸区・多摩区・麻生区', 
       shortName: '幸・多摩・麻生区',
-      description: '中部給食センター', 
+      description: 'B地区', 
       area: '幸区・多摩区・麻生区' 
     },
     { 
       id: 'C', 
       name: '高津区・宮前区', 
       shortName: '高津・宮前区',
-      description: '南部給食センター', 
+      description: 'C地区', 
       area: '高津区・宮前区' 
     }
   ];

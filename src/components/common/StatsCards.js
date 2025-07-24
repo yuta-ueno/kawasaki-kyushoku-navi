@@ -40,29 +40,11 @@ const StatsCards = ({ stats, loading = false }) => {
   // 統計データのデフォルト値
   const {
     totalMenus = 0,
-    specialMenus = 0,
-    avgCalories = 0
+    specialMenus = 0
   } = stats || {};
 
-  // 今月の進捗計算（7月は31日間、実際の給食は平日のみ）
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
-  const monthProgress = Math.min(Math.round((currentDay / 31) * 100), 100);
-
-  // 特別メニューの割合
-  const specialMenuRate = totalMenus > 0 ? Math.round((specialMenus / totalMenus) * 100) : 0;
-
-  // カロリーレベルの判定
-  const getCalorieStatus = (calories) => {
-    if (calories >= 680) return { label: '高エネルギー', color: 'text-red-600' };
-    if (calories >= 620) return { label: '標準', color: 'text-green-600' };
-    return { label: '控えめ', color: 'text-blue-600' };
-  };
-
-  const calorieStatus = getCalorieStatus(avgCalories);
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       {/* 給食実施日数 */}
       <StatCard
         icon={Calendar}
@@ -78,28 +60,8 @@ const StatsCards = ({ stats, loading = false }) => {
         icon={Star}
         title="特別メニュー"
         value={`${specialMenus}日`}
-        subtitle={`全体の${specialMenuRate}% (季節行事等)`}
+        subtitle="季節行事等"
         color="bg-yellow-100 text-yellow-600"
-        loading={loading}
-      />
-
-      {/* 平均カロリー */}
-      <StatCard
-        icon={Apple}
-        title="平均エネルギー"
-        value={`${avgCalories} kcal`}
-        subtitle={`${calorieStatus.label}レベル`}
-        color="bg-orange-100 text-orange-600"
-        loading={loading}
-      />
-
-      {/* 月間進捗 */}
-      <StatCard
-        icon={TrendingUp}
-        title="月間進捗"
-        value={`${monthProgress}%`}
-        subtitle={`7月${currentDay}日経過`}
-        color="bg-green-100 text-green-600"
         loading={loading}
       />
     </div>
