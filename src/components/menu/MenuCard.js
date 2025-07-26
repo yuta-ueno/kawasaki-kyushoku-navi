@@ -18,7 +18,7 @@ const getDayColor = (dayOfWeek) => {
 const MenuCard = ({ menu, isToday = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // メニューアイテムを整理 - React Hookはearly returnの前に配置
+  // ✅ 修正: menuを依存配列に追加してReact Hook警告を解決
   const menuItems = React.useMemo(() => {
     if (!menu) return [];
     
@@ -48,7 +48,7 @@ const MenuCard = ({ menu, isToday = false }) => {
     });
     
     return allItems;
-  }, [menu?.menu?.items, menu?.menu?.description]);
+  }, [menu]); // ✅ 修正: menuを依存配列に追加
   
   if (!menu) {
     return (
