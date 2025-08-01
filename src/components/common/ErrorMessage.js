@@ -13,29 +13,29 @@ const ErrorMessage = ({
       case 'network':
         return {
           icon: Wifi,
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          iconColor: 'text-yellow-600',
-          titleColor: 'text-yellow-800',
-          textColor: 'text-yellow-700'
+          bgColor: 'bg-solarized-base2',
+          borderColor: 'border-solarized-yellow',
+          iconColor: 'text-solarized-yellow',
+          titleColor: 'text-solarized-yellow',
+          textColor: 'text-solarized-base01'
         };
       case 'database':
         return {
           icon: Database,
-          bgColor: 'bg-blue-50',
-          borderColor: 'border-blue-200',
-          iconColor: 'text-blue-600',
-          titleColor: 'text-blue-800',
-          textColor: 'text-blue-700'
+          bgColor: 'bg-solarized-base2',
+          borderColor: 'border-solarized-blue',
+          iconColor: 'text-solarized-blue',
+          titleColor: 'text-solarized-blue',
+          textColor: 'text-solarized-base01'
         };
       default:
         return {
           icon: AlertCircle,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          iconColor: 'text-red-600',
-          titleColor: 'text-red-800',
-          textColor: 'text-red-700'
+          bgColor: 'bg-solarized-base2',
+          borderColor: 'border-solarized-red',
+          iconColor: 'text-solarized-red',
+          titleColor: 'text-solarized-red',
+          textColor: 'text-solarized-base01'
         };
     }
   };
@@ -93,12 +93,12 @@ const ErrorMessage = ({
       )}
 
       {/* 詳細情報 */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <details className="text-xs text-gray-500">
-          <summary className="cursor-pointer hover:text-gray-700">
+      <div className="mt-4 pt-4 border-t border-solarized-base1">
+        <details className="text-xs text-solarized-base00">
+          <summary className="cursor-pointer hover:text-solarized-base01">
             技術的な詳細を表示
           </summary>
-          <div className="mt-2 text-left bg-gray-100 p-3 rounded font-mono">
+          <div className="mt-2 text-left bg-solarized-base2 p-3 rounded font-mono">
             <div>エラータイプ: {type}</div>
             <div>タイムスタンプ: {new Date().toLocaleString('ja-JP')}</div>
             {message && <div>詳細: {message}</div>}

@@ -38,8 +38,8 @@ a {
 }
 
 .loading-spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border: 3px solid #eee8d5;
+  border-top: 3px solid #268bd2;
   border-radius: 50%;
   width: 40px;
   height: 40px;

@@ -87,14 +87,14 @@ const NotificationPopup = ({ isOpen, onClose }) => {
       {/* ポップアップ本体 */}
       <div className="fixed inset-4 md:inset-8 lg:left-1/4 lg:right-1/4 lg:top-16 lg:bottom-16 bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
         {/* ヘッダー */}
-        <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-solarized-blue to-solarized-green text-solarized-base3 p-6 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <Bell className="w-6 h-6" />
             <h2 className="text-xl font-bold">お知らせ</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200"
+            className="p-2 rounded-full bg-solarized-base3 bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,17 +197,17 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* ロゴ・タイトル */}
             <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-              <div className="bg-gradient-to-r from-blue-600 to-green-600 p-1.5 sm:p-2 rounded-xl shadow-md flex-shrink-0">
-                <ChefHat className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+              <div className="bg-gradient-to-r from-solarized-blue to-solarized-green p-1.5 sm:p-2 rounded-xl shadow-md flex-shrink-0">
+                <ChefHat className="w-4 h-4 sm:w-6 sm:h-6 text-solarized-base3" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-xl font-bold text-gray-900 leading-tight truncate">
+                <h1 className="text-base sm:text-xl font-bold text-solarized-base02 leading-tight truncate">
                   かわさき給食ナビ
                 </h1>
-                <p className="text-xs sm:text-xs text-gray-500 leading-tight hidden sm:block">
+                <p className="text-xs sm:text-xs text-solarized-base01 leading-tight hidden sm:block">
                   川崎市の給食を、スマホで簡単チェック
                 </p>
-                <p className="text-xs text-gray-500 leading-tight sm:hidden">
+                <p className="text-xs text-solarized-base01 leading-tight sm:hidden">
                   川崎市の給食情報
                 </p>
               </div>
@@ -216,7 +216,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
             {/* 右側のコントロール */}
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {/* 現在の日時表示（デスクトップのみ） */}
-              <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
+              <div className="hidden lg:flex items-center space-x-2 text-sm text-solarized-base01">
                 <Calendar className="w-4 h-4" />
                 <span>
                   {new Date().toLocaleDateString('ja-JP', { 
@@ -233,11 +233,11 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                   setIsNotificationOpen(true);
                   setHasUnreadNotifications(false);
                 }}
-                className="relative p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="relative p-1.5 sm:p-2 text-solarized-base0 hover:text-solarized-base01 hover:bg-solarized-base2 rounded-lg transition-colors"
               >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
                 {hasUnreadNotifications && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></span>
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-solarized-red rounded-full animate-pulse"></span>
                 )}
               </button>
             </div>
@@ -245,7 +245,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
         </div>
 
         {/* サブヘッダー（地区選択 + 選択地区の詳細情報） */}
-        <div className="bg-gray-50 border-t border-gray-100">
+        <div className="bg-solarized-base2 border-t border-solarized-base1">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-12 sm:h-14">
               {/* 左側：地区選択 */}
@@ -255,7 +255,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                   <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-8 sm:pr-10 text-sm sm:text-base font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm min-w-[160px] sm:min-w-[200px]"
+                    className="appearance-none bg-solarized-base3 border border-solarized-base1 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-8 sm:pr-10 text-sm sm:text-base font-medium text-solarized-base02 hover:border-solarized-base00 focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:border-transparent shadow-sm min-w-[160px] sm:min-w-[200px]"
                     aria-label="給食センター地区を選択"
                   >
                     {districts.map(district => (
@@ -265,24 +265,24 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                     ))}
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 pointer-events-none">
-                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-solarized-base0" />
                   </div>
                 </div>
 
                 {/* 選択中の地区詳細情報 */}
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-solarized-base01">
                   <span className="font-medium">
                     {districts.find(d => d.id === selectedDistrict)?.description}
                   </span>
-                  <span className="text-gray-400 hidden md:inline">•</span>
-                  <span className="text-gray-500 hidden md:inline">
+                  <span className="text-solarized-base0 hidden md:inline">•</span>
+                  <span className="text-solarized-base00 hidden md:inline">
                     対象エリア: {districts.find(d => d.id === selectedDistrict)?.area}
                   </span>
                 </div>
               </div>
               
               {/* 右側：データ提供情報 */}
-              <div className="flex items-center space-x-2 sm:space-x-4 text-xs text-gray-500">
+              <div className="flex items-center space-x-2 sm:space-x-4 text-xs text-solarized-base00">
                 <span className="hidden sm:inline">データ提供: 川崎市教育委員会</span>
                 <span className="hidden sm:inline">•</span>
                 <span>最終更新: 2025/07/12</span>

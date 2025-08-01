@@ -108,7 +108,7 @@ export default function HomePage() {
         />
       </Head>
 
-       <div className="min-h-screen bg-blue-200">
+       <div className="min-h-screen bg-solarized-base3">
         {/* ヘッダー */}
         <Header selectedDistrict={selectedDistrict} setSelectedDistrict={setSelectedDistrict} />
 
@@ -116,13 +116,13 @@ export default function HomePage() {
           {/* 今日の給食セクション */}
           <section className="mb-12">
             <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl mr-3">
-                <ChefHat className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-r from-solarized-orange to-solarized-red p-2 rounded-xl mr-3">
+                <ChefHat className="w-6 h-6 text-solarized-base3" />
               </div>
               <div>
                 {/* SEO最適化: h1タグに変更 */}
-                <h1 className="text-2xl font-bold text-gray-900">川崎市の給食献立情報</h1>
-                <p className="text-gray-600">
+                <h1 className="text-2xl font-bold text-solarized-base02">川崎市の給食献立情報</h1>
+                <p className="text-solarized-base01">
                   {currentDate.toLocaleDateString('ja-JP', { 
                     year: 'numeric', 
                     month: 'long', 
@@ -134,7 +134,7 @@ export default function HomePage() {
             </div>
 
             {/* SEO最適化: h2タグ追加 */}
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">今日の川崎市学校給食献立</h2>
+            <h2 className="text-xl font-semibold text-solarized-base02 mb-4">今日の川崎市学校給食献立</h2>
 
             {todayLoading ? (
               <Loading message="今日の給食を読み込み中..." />
@@ -152,8 +152,8 @@ export default function HomePage() {
                 <div className="text-gray-500 mb-4">
                   <ChefHat className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">今日は給食がありません</h3>
-                <p className="text-gray-500">土日祝日や夏休み期間は給食がお休みです</p>
+                <h3 className="text-lg font-semibold text-solarized-base01 mb-2">今日は給食がありません</h3>
+                <p className="text-solarized-base00">土日祝日や夏休み期間は給食がお休みです</p>
               </div>
             )}
           </section>
@@ -162,13 +162,13 @@ export default function HomePage() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="bg-gradient-to-r from-blue-500 to-green-500 p-2 rounded-xl mr-3">
-                  <Calendar className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-r from-solarized-blue to-solarized-green p-2 rounded-xl mr-3">
+                  <Calendar className="w-6 h-6 text-solarized-base3" />
                 </div>
                 <div>
                   {/* SEO最適化: h2タグ追加 */}
-                  <h2 className="text-2xl font-bold text-gray-900">2025年7月の給食献立</h2>
-                  <p className="text-gray-600">川崎市{selectedDistrict}地区小学校の献立表</p>
+                  <h2 className="text-2xl font-bold text-solarized-base02">2025年7月の給食献立</h2>
+                  <p className="text-solarized-base01">川崎市{selectedDistrict}地区小学校の献立表</p>
                 </div>
               </div>
             </div>
@@ -188,10 +188,10 @@ export default function HomePage() {
               ) : monthlyMenus && monthlyMenus.length > 0 ? (
                 <>
                   <div className="mb-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-solarized-base01">
                       {monthlyMenus.length}件の献立が見つかりました
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-solarized-base00">
                       最終更新: {new Date().toLocaleDateString('ja-JP')}
                     </div>
                   </div>
@@ -213,11 +213,11 @@ export default function HomePage() {
                   <div className="text-gray-500 mb-4">
                     <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">献立データがありません</h3>
-                  <p className="text-gray-500 mb-4">
+                  <h3 className="text-xl font-semibold text-solarized-base01 mb-2">献立データがありません</h3>
+                  <p className="text-solarized-base00 mb-4">
                     2025年7月の{selectedDistrict}地区の献立データが見つかりません
                   </p>
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-solarized-base0">
                     データが正しくインポートされているか確認してください
                   </div>
                 </div>
@@ -228,13 +228,13 @@ export default function HomePage() {
           {/* フッター情報 */}
           <footer className="mt-12 bg-white rounded-xl p-6 shadow-md border border-gray-100">
             <div className="flex items-start space-x-3">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <MapPin className="w-5 h-5 text-blue-600" />
+              <div className="bg-solarized-base2 p-2 rounded-lg">
+                <MapPin className="w-5 h-5 text-solarized-blue" />
               </div>
               <div className="flex-1">
                 {/* SEO最適化: h3タグ追加 */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">川崎市給食について</h3>
-                <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+                <h3 className="text-lg font-semibold text-solarized-base02 mb-2">川崎市給食について</h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm text-solarized-base01">
                   <div>
                     <p className="mb-2">• 栄養価は小学校中学年の基準で表示されています</p>
                     <p className="mb-2">• アレルギー情報は学校にお問い合わせください</p>
@@ -245,7 +245,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-solarized-base00">
                     データ提供: 川崎市教育委員会 | 
                     アプリ開発: かわさき給食ナビ開発チーム | 
                     最終更新: 2025年7月12日 | 
