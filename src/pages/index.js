@@ -187,12 +187,9 @@ export default function HomePage() {
                 />
               ) : monthlyMenus && monthlyMenus.length > 0 ? (
                 <>
-                  <div className="mb-6 flex items-center justify-between">
+                  <div className="mb-6">
                     <div className="text-sm text-solarized-base01">
                       {monthlyMenus.length}件の献立が見つかりました
-                    </div>
-                    <div className="text-xs text-solarized-base00">
-                      最終更新: {new Date().toLocaleDateString('ja-JP')}
                     </div>
                   </div>
                   
@@ -248,7 +245,7 @@ export default function HomePage() {
                   <p className="text-xs text-solarized-base00">
                     データ提供: 川崎市教育委員会 | 
                     アプリ開発: かわさき給食ナビ開発チーム | 
-                    最終更新: 2025年7月12日 | 
+                    最終更新: 2025年8月3日 | 
                     お問い合わせ: contact@kawasaki-kyushoku.jp
                   </p>
                 </div>

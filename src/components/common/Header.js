@@ -9,7 +9,7 @@ const NotificationPopup = ({ isOpen, onClose }) => {
       type: 'maintenance',
       title: 'メンテナンス完了のお知らせ',
       message: 'システムメンテナンスが完了しました。より快適にご利用いただけるよう改善を行いました。',
-      date: '2025-07-22',
+      date: '2025-08-03',
       isNew: true
     },
     {
@@ -279,13 +279,6 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                     対象エリア: {districts.find(d => d.id === selectedDistrict)?.area}
                   </span>
                 </div>
-              </div>
-              
-              {/* 右側：データ提供情報 */}
-              <div className="flex items-center space-x-2 sm:space-x-4 text-xs text-solarized-base00">
-                <span className="hidden sm:inline">データ提供: 川崎市教育委員会</span>
-                <span className="hidden sm:inline">•</span>
-                <span>最終更新: 2025/07/12</span>
               </div>
             </div>
           </div>

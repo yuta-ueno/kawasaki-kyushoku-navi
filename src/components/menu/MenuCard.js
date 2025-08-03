@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Star, ChefHat, Apple, Utensils, Sparkles, Info } from 'lucide-react';
+import { Calendar, Clock, Star, ChefHat, Apple, Utensils, Sparkles } from 'lucide-react';
 
 // 曜日の色分け - ユニバーサルデザイン配慮（色覚障害対応）
 const getDayColor = (dayOfWeek) => {
@@ -16,7 +16,6 @@ const getDayColor = (dayOfWeek) => {
 };
 
 const MenuCard = ({ menu, isToday = false }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
   
   // ✅ 修正: menuを依存配列に追加してReact Hook警告を解決
   const menuItems = React.useMemo(() => {
@@ -159,7 +158,7 @@ const MenuCard = ({ menu, isToday = false }) => {
           </div>
           
           <ul className="space-y-3" role="list">
-            {menuItems.slice(0, isExpanded ? menuItems.length : 3).map((item, index) => (
+            {menuItems.map((item, index) => (
               <li key={index} className="flex items-start text-base text-solarized-base02" role="listitem">
                 <div className="w-3 h-3 bg-solarized-blue rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
                 <span className="leading-relaxed font-bold">{item}</span>
@@ -171,20 +170,6 @@ const MenuCard = ({ menu, isToday = false }) => {
               <div className="w-3 h-3 bg-solarized-blue rounded-full mr-4 flex-shrink-0 mt-2" aria-hidden="true"></div>
               <span className="leading-relaxed font-bold">ぎゅうにゅう</span>
             </li>
-            
-            {menuItems.length > 3 && (
-              <li>
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-base text-solarized-blue hover:text-solarized-blue font-bold flex items-center mt-3 hover:bg-solarized-base2 px-3 py-2 rounded-lg transition-colors border-2 border-solarized-blue hover:border-solarized-blue focus:ring-4 focus:ring-solarized-blue"
-                  aria-expanded={isExpanded}
-                  aria-controls="menu-items-list"
-                >
-                  {isExpanded ? '簡略表示する' : `他${menuItems.length - 3}品目を表示する`}
-                  <Info className="w-4 h-4 ml-2" aria-hidden="true" />
-                </button>
-              </li>
-            )}
           </ul>
 
           {/* 学習ポイント（notes）の表示 - アクセシブル */}
@@ -238,17 +223,6 @@ const MenuCard = ({ menu, isToday = false }) => {
           </div>
         </div>
 
-        {/* 追加情報 - アクセシブル */}
-        <div className="mt-4 pt-4 border-t-2 border-solarized-base1 flex items-center justify-between text-sm text-solarized-base01 font-medium">
-          <div className="flex items-center space-x-4">
-            <span role="img" aria-label={`${menu.district}地区`}>📍 {menu.district}地区</span>
-            {menu.schoolType && <span role="img" aria-label={menu.schoolType}>🏫 {menu.schoolType}</span>}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4" aria-hidden="true" />
-            <time dateTime={menu.date}>{menu.date}</time>
-          </div>
-        </div>
       </footer>
     </article>
   );
