@@ -42,6 +42,7 @@ next-env.d.ts
 
 # かわさき給食ナビ 固有
 .env.local
+.env*.local
 .vercel
 *.log
 .next/

@@ -9,7 +9,7 @@ const NotificationPopup = ({ isOpen, onClose }) => {
       type: 'maintenance',
       title: 'メンテナンス完了のお知らせ',
       message: 'システムメンテナンスが完了しました。より快適にご利用いただけるよう改善を行いました。',
-      date: '2025-08-03',
+      date: '2025-08-12',
       isNew: true
     },
     {
