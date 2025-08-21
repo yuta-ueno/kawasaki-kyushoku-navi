@@ -1,6 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../services/firebase/config';
-import redis from '../../../lib/redis';
+import redis, { rateLimitIncrement } from '../../../lib/redis';
+import { validateInput, todaySchema, formatValidationErrors, getTodayJST } from '../../../lib/validation';
 
 // クライアントIP取得（Vercel環境対応）
 function getClientIP(req) {
@@ -66,7 +67,7 @@ async function checkRateLimit(req) {
     pipeline.expire(key, window);
     const results = await pipeline.exec();
     
-    const count = results[0][1]; // [error, result] の result部分
+    const count = await rateLimitIncrement(key, window);
     
     if (count > limit) {
       return { 
@@ -89,27 +90,6 @@ async function checkRateLimit(req) {
     // フォールバック: Redis障害時はリクエストを通す
     return { allowed: true, count: 0, remaining: limit, resetTime: 0 };
   }
-}
-
-// 入力値検証
-function validateInput(query) {
-  const { date, district = 'A' } = query;
-  
-  // 日付検証（オプション）
-  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    throw new Error('日付形式が正しくありません (YYYY-MM-DD)');
-  }
-  
-  // 地区検証
-  const allowedDistricts = ['A', 'B', 'C', '北部', '中部', '南部'];
-  if (!allowedDistricts.includes(district)) {
-    throw new Error('地区は A, B, C, 北部, 中部, 南部 のいずれかを指定してください');
-  }
-  
-  return { 
-    date: date || new Date().toISOString().split('T')[0], 
-    district 
-  };
 }
 
 // キャッシュヘッダ設定
@@ -152,13 +132,16 @@ function logSecurityEvent(event, req, details = {}) {
 }
 
 export default async function handler(req, res) {
+  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  
   try {
     // 1. HTTPメソッド制限
     if (req.method !== 'GET') {
       res.setHeader('Allow', 'GET');
       return res.status(405).json({ 
         error: 'Method not allowed',
-        allowed: ['GET']
+        allowed: ['GET'],
+        metadata: { requestId, timestamp: new Date().toISOString() }
       });
     }
 
@@ -168,7 +151,8 @@ export default async function handler(req, res) {
     if (!rateLimitResult.allowed) {
       logSecurityEvent('RATE_LIMIT_EXCEEDED', req, {
         count: rateLimitResult.count,
-        limit: 10
+        limit: 10,
+        requestId
       });
       
       // Rate limiting headers
@@ -180,7 +164,8 @@ export default async function handler(req, res) {
       return res.status(429).json({
         error: 'Too many requests',
         message: '1分間に10回までのリクエストに制限されています',
-        retryAfter: 60
+        retryAfter: 60,
+        metadata: { requestId, timestamp: new Date().toISOString() }
       });
     }
     
@@ -195,12 +180,14 @@ export default async function handler(req, res) {
       
       if (!originCheck.valid) {
         logSecurityEvent('INVALID_ORIGIN', req, {
-          providedOrigin: originCheck.origin
+          providedOrigin: originCheck.origin,
+          requestId
         });
         
         return res.status(403).json({ 
           error: 'Forbidden',
-          message: 'Invalid origin'
+          message: 'Invalid origin',
+          metadata: { requestId, timestamp: new Date().toISOString() }
         });
       }
       
@@ -208,23 +195,32 @@ export default async function handler(req, res) {
       setCORSHeaders(res, originCheck.origin);
     }
 
-    // 4. 入力値検証
-    let validatedInput;
-    try {
-      validatedInput = validateInput(req.query);
-    } catch (validationError) {
+    // 4. 入力値検証（Zod使用）
+    const validationResult = validateInput(todaySchema, req.query, {
+      stripUnknown: true,
+      allowPartial: false
+    });
+    
+    if (!validationResult.success) {
+      logSecurityEvent('VALIDATION_FAILED', req, {
+        errors: validationResult.errors,
+        providedQuery: Object.keys(req.query),
+        requestId
+      });
+      
       return res.status(400).json({
-        error: 'Invalid input',
-        message: validationError.message,
-        validDistricts: ['A', 'B', 'C', '北部', '中部', '南部']
+        ...formatValidationErrors(validationResult.errors),
+        metadata: { requestId, timestamp: new Date().toISOString() }
       });
     }
+
+    // バリデーション済みデータの取得
+    const { date = getTodayJST(), district } = validationResult.data;
 
     // 5. キャッシュヘッダ設定
     setCacheHeaders(res);
 
     // 6. データ取得処理
-    const { date, district } = validatedInput;
     const docId = `${date}-${district}`;
     
     const docRef = doc(db, 'kawasaki_menus', docId);
@@ -249,11 +245,16 @@ export default async function handler(req, res) {
         success: true,
         data: sanitizedData,
         metadata: {
-          requestId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          requestId,
           timestamp: new Date().toISOString(),
+          query: { date, district },
           rateLimit: {
             remaining: rateLimitResult.remaining,
             resetTime: rateLimitResult.resetTime
+          },
+          validation: {
+            schema: 'todaySchema',
+            processedFields: Object.keys(validationResult.data)
           }
         }
       });
@@ -263,27 +264,29 @@ export default async function handler(req, res) {
         error: 'Not found',
         message: `指定された日付(${date})・地区(${district})の給食データが見つかりません`,
         metadata: {
-          requestId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          timestamp: new Date().toISOString()
+          requestId,
+          timestamp: new Date().toISOString(),
+          query: { date, district }
         }
       });
     }
 
   } catch (error) {
     // 8. エラーハンドリング
-    console.error('API Error:', error);
+    console.error('Today API Error:', error, { requestId });
     
     // セキュリティログ
     logSecurityEvent('API_ERROR', req, {
       errorType: error.constructor.name,
-      errorMessage: process.env.NODE_ENV === 'production' ? '[REDACTED]' : error.message
+      errorMessage: process.env.NODE_ENV === 'production' ? '[REDACTED]' : error.message,
+      requestId
     });
     
     const errorResponse = {
       success: false,
       error: 'Internal server error',
       metadata: {
-        requestId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        requestId,
         timestamp: new Date().toISOString()
       }
     };
@@ -292,7 +295,7 @@ export default async function handler(req, res) {
     if (process.env.NODE_ENV !== 'production') {
       errorResponse.debug = {
         message: error.message,
-        stack: error.stack
+        stack: error.stack?.split('\n').slice(0, 5).join('\n') // スタックトレースを5行に制限
       };
     }
     

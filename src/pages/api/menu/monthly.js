@@ -1,6 +1,7 @@
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../../services/firebase/config';
-import redis from '../../../lib/redis';
+import redis, { rateLimitIncrement } from '../../../lib/redis';  // 👈 rateLimitIncrement を追加
+import { validateInput, monthlySchema, formatValidationErrors } from '../../../lib/validation';
 
 // クライアントIP取得（Vercel環境対応）
 function getClientIP(req) {
@@ -49,7 +50,7 @@ function validateOrigin(req) {
   return { valid: false, origin: origin || referer || 'unknown' };
 }
 
-// 分散レート制限（Upstash Redis）- 月間データは重いので制限を厳しく
+// 分散レート制限（Upstash Redis）- デバッグ版
 async function checkRateLimit(req) {
   const clientIP = getClientIP(req);
   const { origin } = validateOrigin(req);
@@ -59,82 +60,56 @@ async function checkRateLimit(req) {
   const window = 60; // 1分間
   const limit = 5;   // 5リクエスト（月間データは重いため）
   
+  console.log('=== Rate Limit Check Debug ===');
+  console.log('Client IP:', clientIP);
+  console.log('Origin:', origin);
+  console.log('Path:', path);
+  console.log('Redis Key:', key);
+  console.log('Limit:', limit);
+  console.log('Window:', window);
+  
   try {
-    // Redis pipeline for atomic operations
-    const pipeline = redis.pipeline();
-    pipeline.incr(key);
-    pipeline.expire(key, window);
-    const results = await pipeline.exec();
+    // rateLimitIncrementを使用
+    const count = await rateLimitIncrement(key, window);
     
-    const count = results[0][1]; // [error, result] の result部分
+    console.log('Rate limit count result:', count);
+    console.log('Count type:', typeof count);
+    console.log('Is count valid number?', !isNaN(count) && count > 0);
+    
+    if (isNaN(count)) {
+      console.error('Count is NaN - falling back');
+      return { allowed: true, count: 0, remaining: limit, resetTime: 0 };
+    }
+    
+    const remaining = Math.max(0, limit - count);
+    const resetTime = Math.ceil(Date.now() / 1000) + window;
+    
+    console.log('Calculated remaining:', remaining);
+    console.log('Reset time:', resetTime);
     
     if (count > limit) {
+      console.log('Rate limit exceeded!');
       return { 
         allowed: false, 
         count, 
         remaining: 0,
-        resetTime: Math.ceil(Date.now() / 1000) + window
+        resetTime
       };
     }
     
+    console.log('Rate limit OK');
     return { 
       allowed: true, 
       count, 
-      remaining: limit - count,
-      resetTime: Math.ceil(Date.now() / 1000) + window
+      remaining,
+      resetTime
     };
     
   } catch (error) {
-    console.error('Redis rate limit error:', error);
+    console.error('Rate limit check failed:', error);
     // フォールバック: Redis障害時はリクエストを通す
     return { allowed: true, count: 0, remaining: limit, resetTime: 0 };
   }
-}
-
-// 入力値検証（Zodスキーマ風）
-function validateMonthlyInput(query) {
-  const { 
-    year = new Date().getFullYear(), 
-    month = new Date().getMonth() + 1, 
-    district = 'A' 
-  } = query;
-
-  // 年の検証
-  const yearNum = parseInt(year);
-  if (isNaN(yearNum) || yearNum < 2024 || yearNum > 2030) {
-    throw new Error('年は2024年から2030年の間で指定してください');
-  }
-
-  // 月の検証
-  const monthNum = parseInt(month);
-  if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-    throw new Error('月は1から12の間で指定してください');
-  }
-
-  // 地区の検証
-  const allowedDistricts = ['A', 'B', 'C', '北部', '中部', '南部'];
-  if (!allowedDistricts.includes(district)) {
-    throw new Error('地区は A, B, C, 北部, 中部, 南部 のいずれかを指定してください');
-  }
-
-  // 未来日付の制限（運用上の考慮）
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-  
-  if (yearNum > currentYear || (yearNum === currentYear && monthNum > currentMonth + 2)) {
-    throw new Error('2ヶ月以降の未来のデータは取得できません');
-  }
-
-  // 未知のクエリパラメータをフィルタリング
-  const validParams = { year: yearNum, month: monthNum, district };
-  const unknownParams = Object.keys(query).filter(key => !['year', 'month', 'district'].includes(key));
-  
-  if (unknownParams.length > 0) {
-    console.warn('Unknown query parameters ignored:', unknownParams);
-  }
-
-  return validParams;
 }
 
 // キャッシュヘッダ設定（月間データは長期キャッシュ）
@@ -215,7 +190,8 @@ export default async function handler(req, res) {
       logSecurityEvent('RATE_LIMIT_EXCEEDED', req, {
         count: rateLimitResult.count,
         limit: 5,
-        endpoint: 'monthly'
+        endpoint: 'monthly',
+        requestId
       });
       
       // Rate limiting headers
@@ -244,7 +220,8 @@ export default async function handler(req, res) {
       if (!originCheck.valid) {
         logSecurityEvent('INVALID_ORIGIN', req, {
           providedOrigin: originCheck.origin,
-          endpoint: 'monthly'
+          endpoint: 'monthly',
+          requestId
         });
         
         return res.status(403).json({ 
@@ -258,29 +235,33 @@ export default async function handler(req, res) {
       setCORSHeaders(res, originCheck.origin);
     }
 
-    // 4. 入力値検証
-    let validatedInput;
-    try {
-      validatedInput = validateMonthlyInput(req.query);
-    } catch (validationError) {
+    // 4. 入力値検証（Zod使用）
+    const validationResult = validateInput(monthlySchema, req.query, {
+      stripUnknown: true,
+      allowPartial: false
+    });
+    
+    if (!validationResult.success) {
+      logSecurityEvent('VALIDATION_FAILED', req, {
+        errors: validationResult.errors,
+        providedQuery: Object.keys(req.query),
+        endpoint: 'monthly',
+        requestId
+      });
+      
       return res.status(400).json({
-        error: 'Invalid input',
-        message: validationError.message,
-        validParams: {
-          year: '2024-2030の整数',
-          month: '1-12の整数',
-          district: ['A', 'B', 'C', '北部', '中部', '南部']
-        },
+        ...formatValidationErrors(validationResult.errors),
         metadata: { requestId, timestamp: new Date().toISOString() }
       });
     }
+
+    // バリデーション済みデータの取得
+    const { year, month, district } = validationResult.data;
 
     // 5. キャッシュヘッダ設定
     setCacheHeaders(res);
 
     // 6. データ取得処理
-    const { year, month, district } = validatedInput;
-    
     const menusRef = collection(db, 'kawasaki_menus');
     const q = query(
       menusRef,
@@ -308,7 +289,8 @@ export default async function handler(req, res) {
       logSecurityEvent('LARGE_DATASET_REQUEST', req, {
         totalCount: menus.length,
         limitedTo: maxResults,
-        year, month, district
+        year, month, district,
+        requestId
       });
     }
 
@@ -323,7 +305,11 @@ export default async function handler(req, res) {
               .reduce((sum, menu) => sum + menu.nutrition.energy, 0) / 
             limitedMenus.filter(menu => menu.nutrition?.energy).length
           )
-        : 0
+        : 0,
+      dateRange: limitedMenus.length > 0 ? {
+        start: limitedMenus[0]?.date,
+        end: limitedMenus[limitedMenus.length - 1]?.date
+      } : null
     };
 
     // 10. レスポンス返却
@@ -341,6 +327,10 @@ export default async function handler(req, res) {
         rateLimit: {
           remaining: rateLimitResult.remaining,
           resetTime: rateLimitResult.resetTime
+        },
+        validation: {
+          schema: 'monthlySchema',
+          processedFields: Object.keys(validationResult.data)
         }
       }
     });
@@ -370,7 +360,7 @@ export default async function handler(req, res) {
     if (process.env.NODE_ENV !== 'production') {
       errorResponse.debug = {
         message: error.message,
-        stack: error.stack
+        stack: error.stack?.split('\n').slice(0, 5).join('\n') // スタックトレースを5行に制限
       };
     }
     
