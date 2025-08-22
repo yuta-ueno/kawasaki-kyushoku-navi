@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.5.0",
     "@upstash/redis": "^1.35.3",
     "firebase": "^10.12.2",
     "lucide-react": "^0.263.1",
