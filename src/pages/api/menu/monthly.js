@@ -7,58 +7,35 @@ import {
   formatValidationErrors,
 } from '../../../lib/validation'
 import { captureAPIError, captureSecurityEvent } from '../../../lib/sentry'
+import {
+  handleApiError,
+  checkRateLimitResult,
+  validateOriginResult,
+  validateInputResult,
+  setCommonHeaders,
+  formatSuccessResponse,
+  getClientIP,
+  generateRequestId
+} from '../../../lib/api-utils'
+import { RateLimitError, ValidationError, OriginError } from '../../../lib/errors'
+import {
+  setCorsHeaders,
+  handlePreflightRequest,
+  validateOriginForApi,
+  logCorsAccess,
+  debugCorsConfig
+} from '../../../lib/cors-config'
 
-// クライアントIP取得（Vercel環境対応）
-function getClientIP(req) {
-  const forwarded = req.headers['x-forwarded-for']
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
-
-  const realIP = req.headers['x-real-ip']
-  if (realIP) {
-    return realIP
-  }
-
-  return req.socket?.remoteAddress || 'unknown'
-}
-
-// Origin/Referer検証（完全一致）
-function validateOrigin(req) {
-  const ALLOWED_ORIGINS = [
-    'https://kawasaki-kyushoku.jp',
-    'https://kawasaki-lunch.vercel.app',
-    'https://www.kawasaki-lunch.com',
-    'https://kawasaki-lunch.com',
-    'http://localhost:3000',
-  ]
-
-  // Origin優先チェック
-  const origin = req.headers.origin
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    return { valid: true, origin }
-  }
-
-  // Referer fallback（完全一致）
-  const referer = req.headers.referer || req.headers.referrer
-  if (referer) {
-    try {
-      const refererOrigin = new URL(referer).origin
-      if (ALLOWED_ORIGINS.includes(refererOrigin)) {
-        return { valid: true, origin: refererOrigin }
-      }
-    } catch (e) {
-      // Invalid URL
-    }
-  }
-
-  return { valid: false, origin: origin || referer || 'unknown' }
+// CORS設定は cors-config.js に移動済み
+// デバッグ情報出力（開発環境のみ）
+if (process.env.NODE_ENV === 'development') {
+  debugCorsConfig()
 }
 
 // 分散レート制限（Upstash Redis）
 async function checkRateLimit(req) {
   const clientIP = getClientIP(req)
-  const { origin } = validateOrigin(req)
+  const origin = req.headers.origin || req.headers.referer || 'unknown'
   const path = req.url || '/api/menu/monthly'
 
   const key = `rate_limit:${clientIP}:${origin}:${path}`
@@ -98,58 +75,7 @@ async function checkRateLimit(req) {
   }
 }
 
-// キャッシュヘッダ設定（月間データは長期キャッシュ）
-function setCacheHeaders(res) {
-  // 24時間キャッシュ、stale-while-revalidateで10分間
-  res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=86400, stale-while-revalidate=600'
-  )
-  res.setHeader('Vary', 'Origin')
-}
-
-// CORS設定
-function setCORSHeaders(res, origin) {
-  const ALLOWED_ORIGINS = [
-    'https://kawasaki-kyushoku.jp',
-    'https://kawasaki-lunch.vercel.app',
-    'https://www.kawasaki-lunch.com',
-    'https://kawasaki-lunch.com',
-    'http://localhost:3000',
-  ]
-
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin)
-    res.setHeader('Access-Control-Allow-Methods', 'GET')
-    res.setHeader('Vary', 'Origin')
-  }
-}
-
-// セキュリティログ（Sentry統合版）
-function logSecurityEvent(event, req, details = {}) {
-  const clientIP = getClientIP(req)
-  const { origin } = validateOrigin(req)
-
-  // 既存のコンソールログ
-  console.warn(`Security event: ${event}`, {
-    ip: clientIP?.substring(0, 12) + '***', // IP部分マスク
-    origin,
-    path: req.url,
-    userAgent: req.headers['user-agent']?.substring(0, 50),
-    timestamp: new Date().toISOString(),
-    ...details,
-  })
-
-  // Sentryに送信
-  captureSecurityEvent(event, {
-    ip: clientIP,
-    origin,
-    path: req.url,
-    userAgent: req.headers['user-agent'],
-    endpoint: 'monthly',
-    ...details,
-  })
-}
+// 古い関数は削除済み - cors-config.js と api-utils.js に移動
 
 // データサニタイゼーション
 function sanitizeMenuData(doc) {
@@ -170,96 +96,57 @@ function sanitizeMenuData(doc) {
 }
 
 export default async function handler(req, res) {
-  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  const requestId = generateRequestId()
 
   try {
-    // 1. HTTPメソッド制限
+    // 1. プリフライトリクエスト（OPTIONS）の処理
+    if (req.method === 'OPTIONS') {
+      return handlePreflightRequest(req, res)
+    }
+
+    // 2. CORS設定と Origin検証
+    const corsValidation = validateOriginForApi(req, res)
+    if (!corsValidation.valid) {
+      return res.status(corsValidation.error.status).json(corsValidation.error.response)
+    }
+
+    // 3. HTTPメソッド制限
     if (req.method !== 'GET') {
-      res.setHeader('Allow', 'GET')
+      res.setHeader('Allow', 'GET, OPTIONS')
       return res.status(405).json({
         error: 'Method not allowed',
-        allowed: ['GET'],
+        allowed: ['GET', 'OPTIONS'],
         metadata: { requestId, timestamp: new Date().toISOString() },
       })
     }
 
-    // 2. レート制限チェック（月間データは5回/分の制限）
+    // 4. レート制限チェック（新しいエラーハンドリング）
     const rateLimitResult = await checkRateLimit(req)
-
-    if (!rateLimitResult.allowed) {
-      logSecurityEvent('RATE_LIMIT_EXCEEDED', req, {
-        count: rateLimitResult.count,
-        limit: 5,
-        endpoint: 'monthly',
-        requestId,
-      })
-
-      // Rate limiting headers
-      res.setHeader('X-RateLimit-Limit', '5')
-      res.setHeader('X-RateLimit-Remaining', '0')
-      res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime)
-      res.setHeader('Retry-After', '60')
-
-      return res.status(429).json({
-        error: 'Too many requests',
-        message: '月間データは1分間に5回までのリクエストに制限されています',
-        retryAfter: 60,
-        metadata: { requestId, timestamp: new Date().toISOString() },
-      })
-    }
+    checkRateLimitResult(rateLimitResult, 5, 60) // RateLimitErrorをthrowする可能性
 
     // Rate limiting headers（成功時）
     res.setHeader('X-RateLimit-Limit', '5')
     res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString())
     res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime.toString())
 
-    // 3. Origin/Referer検証（本番環境のみ）
-    if (process.env.NODE_ENV === 'production') {
-      const originCheck = validateOrigin(req)
-
-      if (!originCheck.valid) {
-        logSecurityEvent('INVALID_ORIGIN', req, {
-          providedOrigin: originCheck.origin,
-          endpoint: 'monthly',
-          requestId,
-        })
-
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Invalid origin',
-          metadata: { requestId, timestamp: new Date().toISOString() },
-        })
-      }
-
-      // CORS設定
-      setCORSHeaders(res, originCheck.origin)
-    }
-
-    // 4. 入力値検証（Zod使用）
+    // 5. 入力値検証（新しいエラーハンドリング）
     const validationResult = validateInput(monthlySchema, req.query, {
       stripUnknown: true,
       allowPartial: false,
     })
-
-    if (!validationResult.success) {
-      logSecurityEvent('VALIDATION_FAILED', req, {
-        errors: validationResult.errors,
-        providedQuery: Object.keys(req.query),
-        endpoint: 'monthly',
-        requestId,
-      })
-
-      return res.status(400).json({
-        ...formatValidationErrors(validationResult.errors),
-        metadata: { requestId, timestamp: new Date().toISOString() },
-      })
-    }
+    const validatedData = validateInputResult(validationResult) // ValidationErrorをthrowする可能性
 
     // バリデーション済みデータの取得
-    const { year, month, district } = validationResult.data
+    const { year, month, district } = validatedData
 
-    // 5. キャッシュヘッダ設定
-    setCacheHeaders(res)
+    // 6. 共通ヘッダ設定（キャッシュ、セキュリティ）
+    // CORS設定は既に validateOriginForApi で設定済み
+    setCommonHeaders(res, {
+      cacheMaxAge: 86400, // 24時間
+      staleWhileRevalidate: 600, // 10分
+      allowedOrigin: corsValidation.origin,
+      endpoint: 'monthly'
+    })
 
     // 6. データ取得処理
     const menusRef = collection(db, 'kawasaki_menus')
@@ -325,12 +212,9 @@ export default async function handler(req, res) {
     }
 
     // 10. レスポンス返却
-    return res.status(200).json({
-      success: true,
-      data: limitedMenus,
-      metadata: {
+    return res.status(200).json(
+      formatSuccessResponse(limitedMenus, {
         requestId,
-        timestamp: new Date().toISOString(),
         query: { year, month, district },
         count: limitedMenus.length,
         totalCount: menus.length,
@@ -342,59 +226,12 @@ export default async function handler(req, res) {
         },
         validation: {
           schema: 'monthlySchema',
-          processedFields: Object.keys(validationResult.data),
+          processedFields: Object.keys(validatedData),
         },
-      },
-    })
+      })
+    )
   } catch (error) {
-    // 11. エラーハンドリング（Sentry統合版）
-    console.error('Monthly API Error:', error, { requestId })
-
-    // Sentryにエラー送信
-    captureAPIError(error, {
-      requestId,
-      endpoint: 'monthly',
-      query: req.query,
-      method: req.method,
-      userAgent: req.headers['user-agent'],
-      ip: getClientIP(req),
-      path: req.url,
-    })
-
-    // セキュリティログ
-    logSecurityEvent('API_ERROR', req, {
-      errorType: error.constructor.name,
-      errorMessage:
-        process.env.NODE_ENV === 'production' ? '[REDACTED]' : error.message,
-      endpoint: 'monthly',
-      requestId,
-    })
-
-    const errorResponse = {
-      success: false,
-      error: 'Internal server error',
-      metadata: {
-        requestId,
-        timestamp: new Date().toISOString(),
-      },
-    }
-
-    // 開発環境では詳細エラー情報を含める
-    if (process.env.NODE_ENV !== 'production') {
-      errorResponse.debug = {
-        message: error.message,
-        stack: error.stack?.split('\n').slice(0, 5).join('\n'), // スタックトレースを5行に制限
-      }
-    }
-
-    // Firestoreエラーの特別処理
-    if (error.code && error.code.startsWith('firestore/')) {
-      errorResponse.error = 'Database error'
-      if (process.env.NODE_ENV !== 'production') {
-        errorResponse.debug.firestoreCode = error.code
-      }
-    }
-
-    return res.status(500).json(errorResponse)
+    // 11. 統一エラーハンドリング
+    return handleApiError(error, res, requestId)
   }
 }

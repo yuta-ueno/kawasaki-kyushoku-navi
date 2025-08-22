@@ -43,6 +43,9 @@ const StatsCards = ({ stats, loading = false }) => {
     specialMenus = 0
   } = stats || {};
 
+  // 現在の月を取得
+  const currentMonth = new Date().getMonth() + 1;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       {/* 給食実施日数 */}
@@ -50,7 +53,7 @@ const StatsCards = ({ stats, loading = false }) => {
         icon={Calendar}
         title="給食実施日"
         value={`${totalMenus}日`}
-        subtitle="7月の給食提供日数"
+        subtitle={`${currentMonth}月の給食提供日数`}
         color="bg-solarized-base2 text-solarized-blue"
         loading={loading}
       />
