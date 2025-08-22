@@ -7,6 +7,7 @@ const ALLOWED_ORIGINS = {
   production: [
     'https://kawasaki-kyushoku.jp',
     'https://kawasaki-lunch.vercel.app',
+    'https://kawasaki-kyushoku-navi-i9esy0reb-yutas-projects-fc6b6de6.vercel.app',
     'https://www.kawasaki-lunch.com',
     'https://kawasaki-lunch.com',
     // 将来追加予定
@@ -89,6 +90,14 @@ export function isOriginAllowed(origin) {
     if (origin === allowed || 
         origin === allowed.replace('https://', 'http://') || 
         origin === allowed.replace('http://', 'https://')) {
+      return true
+    }
+  }
+  
+  // Vercelの自動生成URLパターンマッチング
+  if (process.env.NODE_ENV === 'production') {
+    const vercelPattern = /^https:\/\/kawasaki-kyushoku-navi-[a-z0-9]+-yutas-projects-fc6b6de6\.vercel\.app$/
+    if (vercelPattern.test(origin)) {
       return true
     }
   }
