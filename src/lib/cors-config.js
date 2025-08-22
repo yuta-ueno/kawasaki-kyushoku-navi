@@ -5,11 +5,7 @@ import { getClientIP } from './api-utils'
 // 許可されたオリジンの管理
 const ALLOWED_ORIGINS = {
   production: [
-    'https://kawasaki-kyushoku.jp',
-    'https://kawasaki-lunch.vercel.app',
-    'https://kawasaki-kyushoku-navi-i9esy0reb-yutas-projects-fc6b6de6.vercel.app',
-    'https://www.kawasaki-lunch.com',
-    'https://kawasaki-lunch.com',
+    'https://www.kawasaki-kyushoku.jp',
     // 将来追加予定
     // 'https://www.city.kawasaki.jp',
     // 'https://city.kawasaki.jp'
@@ -24,17 +20,11 @@ const ALLOWED_ORIGINS = {
 
 // ドメイン別設定（将来の拡張準備）
 const DOMAIN_CONFIGS = {
-  // 現在の設定
-  'kawasaki-lunch.vercel.app': {
-    allowedMethods: ['GET', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Origin', 'Accept', 'X-Requested-With'],
-    maxAge: 86400, // 24時間
-    credentials: false
-  },
+  // 本番ドメイン設定
   'kawasaki-kyushoku.jp': {
     allowedMethods: ['GET', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Origin', 'Accept', 'X-Requested-With'],
-    maxAge: 86400,
+    maxAge: 86400, // 24時間
     credentials: false
   },
   // 将来の川崎市公式ドメイン用
@@ -94,13 +84,7 @@ export function isOriginAllowed(origin) {
     }
   }
   
-  // Vercelの自動生成URLパターンマッチング
-  if (process.env.NODE_ENV === 'production') {
-    const vercelPattern = /^https:\/\/kawasaki-kyushoku-navi-[a-z0-9]+-yutas-projects-fc6b6de6\.vercel\.app$/
-    if (vercelPattern.test(origin)) {
-      return true
-    }
-  }
+  // 本番環境では厳格に管理された本番ドメインのみ許可
   
   return false
 }
@@ -130,7 +114,7 @@ export function getDomainConfig(origin) {
   }
   
   // デフォルト設定を返す
-  return DOMAIN_CONFIGS['kawasaki-lunch.vercel.app']
+  return DOMAIN_CONFIGS['kawasaki-kyushoku.jp']
 }
 
 /**
