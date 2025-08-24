@@ -3,12 +3,27 @@ import { db } from './config';
 
 export const importKawasakiMenuData = async (menuData) => {
   try {
+    // データ構造の検証
+    if (!menuData || !menuData.metadata || !menuData.menus) {
+      throw new Error('Invalid menu data structure');
+    }
+    
     console.log('給食データインポート開始...', {
       year: menuData.metadata.year,
       month: menuData.metadata.month,
       district: menuData.metadata.district,
       menuCount: menuData.menus.length
     });
+    
+    // Firebase接続テスト
+    console.log('Firebase接続テスト...');
+    try {
+      const testDoc = doc(db, 'test', 'connection');
+      console.log('Firebase接続正常');
+    } catch (fbError) {
+      console.error('Firebase接続エラー:', fbError);
+      throw new Error(`Firebase接続失敗: ${fbError.message}`);
+    }
 
     const batch = writeBatch(db);
     
@@ -48,7 +63,18 @@ export const importKawasakiMenuData = async (menuData) => {
     }, { merge: true });
     
     // 4. バッチ実行
-    await batch.commit();
+    console.log('Firestoreバッチ書き込み開始...');
+    try {
+      await batch.commit();
+      console.log('Firestoreバッチ書き込み完了');
+    } catch (batchError) {
+      console.error('バッチ書き込みエラー:', {
+        message: batchError.message,
+        code: batchError.code,
+        stack: batchError.stack
+      });
+      throw batchError;
+    }
     
     console.log('✅ 給食データインポート完了');
     return { 
@@ -63,7 +89,19 @@ export const importKawasakiMenuData = async (menuData) => {
     };
     
   } catch (error) {
-    console.error('❌ インポートエラー:', error);
-    return { success: false, error: error.message };
+    console.error('❌ インポートエラー詳細:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      name: error.name
+    });
+    return { 
+      success: false, 
+      error: error.message,
+      errorDetails: {
+        code: error.code,
+        name: error.name
+      }
+    };
   }
 };

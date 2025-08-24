@@ -1,0 +1,478 @@
+{
+  "metadata": {
+    "title": "川崎市C地区小学校給食献立表",
+    "year": 2025,
+    "month": 9,
+    "district": "C",
+    "schoolType": "小学校",
+    "totalDays": 20,
+    "nutritionStats": {
+      "energy": {
+        "min": 590.3,
+        "max": 737.23,
+        "average": 650.57
+      },
+      "protein": {
+        "min": 24.09,
+        "max": 31.07,
+        "average": 27.46
+      }
+    },
+    "createdAt": "2025-08-24T08:37:56Z",
+    "source": "川崎市教育委員会 給食献立表 R7-09syou.xlsx",
+    "dataVersion": "4.0",
+    "includedNutrition": [
+      "energy",
+      "protein"
+    ],
+    "note": "各地区は同一献立を異なる日程で提供／9月は行事食なし"
+  },
+  "menus": [
+    {
+      "date": "2025-09-01",
+      "dayOfWeek": "月",
+      "district": "C",
+      "menu": {
+        "description": "ビビンバ（むぎごはん） わかめとコーンのスープ ぎゅうにゅう",
+        "items": [
+          "ビビンバ（むぎごはん）",
+          "わかめとコーンのスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 611.0,
+        "energyUnit": "kcal",
+        "protein": 27.0,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-02",
+      "dayOfWeek": "火",
+      "district": "C",
+      "menu": {
+        "description": "フィッシュサンド（はいがサンドパン・ホキフライ） こふきいも ミネストローネ ぎゅうにゅう",
+        "items": [
+          "フィッシュサンド（はいがサンドパン・ホキフライ）",
+          "こふきいも",
+          "ミネストローネ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 732.42,
+        "energyUnit": "kcal",
+        "protein": 28.03,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-03",
+      "dayOfWeek": "水",
+      "district": "C",
+      "menu": {
+        "description": "むぎごはん だいずミートのドライカレー キャベツとじゃこのいために ぎゅうにゅう",
+        "items": [
+          "むぎごはん",
+          "だいずミートのドライカレー",
+          "キャベツとじゃこのいために",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 626.31,
+        "energyUnit": "kcal",
+        "protein": 25.78,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-04",
+      "dayOfWeek": "木",
+      "district": "C",
+      "menu": {
+        "description": "しろパン いちごジャム ぶたにくのトマトに ベジタブルスープ ぎゅうにゅう",
+        "items": [
+          "しろパン",
+          "いちごジャム",
+          "ぶたにくのトマトに",
+          "ベジタブルスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 624.05,
+        "energyUnit": "kcal",
+        "protein": 29.96,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-05",
+      "dayOfWeek": "金",
+      "district": "C",
+      "menu": {
+        "description": "ごはん ハンバーグわふうソース やさいスープ ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "ハンバーグわふうソース",
+          "やさいスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 615.8,
+        "energyUnit": "kcal",
+        "protein": 24.99,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-08",
+      "dayOfWeek": "月",
+      "district": "C",
+      "menu": {
+        "description": "ごはん さばのしおやき ごもくまめ みそしる ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "さばのしおやき",
+          "ごもくまめ",
+          "みそしる",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 737.23,
+        "energyUnit": "kcal",
+        "protein": 29.61,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-09",
+      "dayOfWeek": "火",
+      "district": "C",
+      "menu": {
+        "description": "ハヤシライス（むぎごはん） ピクルス ぎゅうにゅう",
+        "items": [
+          "ハヤシライス（むぎごはん）",
+          "ピクルス",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 693.4,
+        "energyUnit": "kcal",
+        "protein": 25.17,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-10",
+      "dayOfWeek": "水",
+      "district": "C",
+      "menu": {
+        "description": "パンプキンロールパン とりにくのからあげ コンソメスープ なし ぎゅうにゅう",
+        "items": [
+          "パンプキンロールパン",
+          "とりにくのからあげ",
+          "コンソメスープ",
+          "なし",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 598.58,
+        "energyUnit": "kcal",
+        "protein": 30.4,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-11",
+      "dayOfWeek": "木",
+      "district": "C",
+      "menu": {
+        "description": "ごはん やきのり かんこくふうにくじゃが はるさめスープ ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "やきのり",
+          "かんこくふうにくじゃが",
+          "はるさめスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 620.1,
+        "energyUnit": "kcal",
+        "protein": 24.09,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-12",
+      "dayOfWeek": "金",
+      "district": "C",
+      "menu": {
+        "description": "ビーンズサンド（カレーサンドパン・ビーンズ） じゃがいものからあげ スコッチブロス ぎゅうにゅう",
+        "items": [
+          "ビーンズサンド（カレーサンドパン・ビーンズ）",
+          "じゃがいものからあげ",
+          "スコッチブロス",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 630.78,
+        "energyUnit": "kcal",
+        "protein": 25.85,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-16",
+      "dayOfWeek": "火",
+      "district": "C",
+      "menu": {
+        "description": "ホイコーローどん（むぎごはん） にらたまスープ ぎゅうにゅう",
+        "items": [
+          "ホイコーローどん（むぎごはん）",
+          "にらたまスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 645.7,
+        "energyUnit": "kcal",
+        "protein": 29.6,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-17",
+      "dayOfWeek": "水",
+      "district": "C",
+      "menu": {
+        "description": "ロールパン ミートポテトのチーズやき コーンソテー しょうなんゴールドゼリー ぎゅうにゅう",
+        "items": [
+          "ロールパン",
+          "ミートポテトのチーズやき",
+          "コーンソテー",
+          "しょうなんゴールドゼリー",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 638.0,
+        "energyUnit": "kcal",
+        "protein": 27.5,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-18",
+      "dayOfWeek": "木",
+      "district": "C",
+      "menu": {
+        "description": "ごはん まぐろとだいずのみそがらめ ワンタンスープ ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "まぐろとだいずのみそがらめ",
+          "ワンタンスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 663.74,
+        "energyUnit": "kcal",
+        "protein": 31.07,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-19",
+      "dayOfWeek": "金",
+      "district": "C",
+      "menu": {
+        "description": "こうやどうふのそぼろごはん(むぎごはん) ごまきゅうり けんちんじる ぎゅうにゅう",
+        "items": [
+          "こうやどうふのそぼろごはん(むぎごはん)",
+          "ごまきゅうり",
+          "けんちんじる",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 635.67,
+        "energyUnit": "kcal",
+        "protein": 29.6,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-22",
+      "dayOfWeek": "月",
+      "district": "C",
+      "menu": {
+        "description": "ごはん ごましお ユーリンチー はるさめのちゅうかスープ ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "ごましお",
+          "ユーリンチー",
+          "はるさめのちゅうかスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 693.42,
+        "energyUnit": "kcal",
+        "protein": 30.36,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-24",
+      "dayOfWeek": "水",
+      "district": "C",
+      "menu": {
+        "description": "ごはん なまあげのしせんに とうがんスープ ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "なまあげのしせんに",
+          "とうがんスープ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 632.58,
+        "energyUnit": "kcal",
+        "protein": 27.85,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-25",
+      "dayOfWeek": "木",
+      "district": "C",
+      "menu": {
+        "description": "くろしょくパン かぼちゃのグラタン ボイルやさい わふうドレッシング ぎゅうにゅう",
+        "items": [
+          "くろしょくパン",
+          "かぼちゃのグラタン",
+          "ボイルやさい",
+          "わふうドレッシング",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 593.21,
+        "energyUnit": "kcal",
+        "protein": 24.59,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-26",
+      "dayOfWeek": "金",
+      "district": "C",
+      "menu": {
+        "description": "ごはん さばのあまからあげ キャベツのおかかあえ みそしる ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "さばのあまからあげ",
+          "キャベツのおかかあえ",
+          "みそしる",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 719.96,
+        "energyUnit": "kcal",
+        "protein": 24.71,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-29",
+      "dayOfWeek": "月",
+      "district": "C",
+      "menu": {
+        "description": "ごはん ちくわのいそべあげ もやしいため ぶたじる ぎゅうにゅう",
+        "items": [
+          "ごはん",
+          "ちくわのいそべあげ",
+          "もやしいため",
+          "ぶたじる",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 709.19,
+        "energyUnit": "kcal",
+        "protein": 28.01,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    },
+    {
+      "date": "2025-09-30",
+      "dayOfWeek": "火",
+      "district": "C",
+      "menu": {
+        "description": "はいがロールパン カレーシチュー ひじきのサラダ ぎゅうにゅう",
+        "items": [
+          "はいがロールパン",
+          "カレーシチュー",
+          "ひじきのサラダ",
+          "ぎゅうにゅう"
+        ]
+      },
+      "nutrition": {
+        "energy": 590.3,
+        "energyUnit": "kcal",
+        "protein": 24.94,
+        "proteinUnit": "g"
+      },
+      "hasSpecialMenu": false,
+      "notes": ""
+    }
+  ]
+}

@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { importKawasakiMenuData } from '../../services/firebase/import';
 
 // データファイルをインポート
-import menuDataA from '../../data/kk2507a.json';
-import menuDataB from '../../data/kk2507b.json';
-import menuDataC from '../../data/kk2507c.json';
+import menuDataA from '../../data/kk2509a.json';
+import menuDataB from '../../data/kk2509b.json';
+import menuDataC from '../../data/kk2509c.json';
 
 export default function ImportPage() {
   const [status, setStatus] = useState('ready');
@@ -33,10 +33,12 @@ export default function ImportPage() {
         });
         console.log(`${dataset.name}完了: ${result.count}件`);
       } catch (error) {
+        console.error(`${dataset.name}インポートエラー:`, error);
         importResults.push({
           district: dataset.name,
           success: false,
-          error: error.message
+          error: error.message,
+          errorDetails: error.errorDetails || null
         });
       }
     }

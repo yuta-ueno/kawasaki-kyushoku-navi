@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   ChefHat,
   MapPin,
@@ -8,6 +10,7 @@ import {
   AlertTriangle,
   Star,
   Info,
+  Droplets,
 } from 'lucide-react'
 
 // お知らせポップアップコンポーネント
@@ -19,14 +22,14 @@ const NotificationPopup = ({ isOpen, onClose }) => {
       title: 'メンテナンス完了のお知らせ',
       message:
         'システムメンテナンスが完了しました。より快適にご利用いただけるよう改善を行いました。',
-      date: '2025-08-22',
+      date: '2025-08-24',
       isNew: true,
     },
     {
       id: 2,
-      type: 'important',
-      title: '夏季休業中の給食について',
-      message: '7月18日（金）で夏休み前の給食は終了しました。',
+      type: 'maintenance',
+      title: '9月の給食について',
+      message: '9月の給食データを更新しました。',
       date: '2025-07-18',
       isNew: false,
     },
@@ -175,6 +178,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
   // お知らせポップアップの状態管理（追加）
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
+  const router = useRouter()
 
   const districts = [
     {
@@ -254,48 +258,78 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
           </div>
         </div>
 
-        {/* サブヘッダー（地区選択 + 選択地区の詳細情報） */}
+        {/* ナビゲーションタブ */}
         <div className="bg-solarized-base2 border-t border-solarized-base1">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-12 sm:h-14">
-              {/* 左側：地区選択 */}
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                {/* 地区選択セレクトボックス */}
-                <div className="relative">
-                  <select
-                    value={selectedDistrict}
-                    onChange={e => setSelectedDistrict(e.target.value)}
-                    className="appearance-none bg-solarized-base3 border border-solarized-base1 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-8 sm:pr-10 text-sm sm:text-base font-medium text-solarized-base02 hover:border-solarized-base00 focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:border-transparent shadow-sm min-w-[160px] sm:min-w-[200px]"
-                    aria-label="給食センター地区を選択"
+            <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between h-auto sm:h-14 py-2 sm:py-0">
+              {/* ナビゲーションタブ */}
+              <div className="flex space-x-1 bg-solarized-base1 rounded-lg p-1">
+                <Link href="/">
+                  <button
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      router.pathname === '/'
+                        ? 'bg-solarized-base3 text-solarized-base02 shadow-sm'
+                        : 'text-solarized-base01 hover:text-solarized-base02 hover:bg-solarized-base2'
+                    }`}
                   >
-                    {districts.map(district => (
-                      <option key={district.id} value={district.id}>
-                        {district.shortName}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 pointer-events-none">
-                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-solarized-base0" />
-                  </div>
-                </div>
-
-                {/* 選択中の地区詳細情報 */}
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-solarized-base01">
-                  <span className="font-medium">
-                    {
-                      districts.find(d => d.id === selectedDistrict)
-                        ?.description
-                    }
-                  </span>
-                  <span className="text-solarized-base0 hidden md:inline">
-                    •
-                  </span>
-                  <span className="text-solarized-base00 hidden md:inline">
-                    対象エリア:{' '}
-                    {districts.find(d => d.id === selectedDistrict)?.area}
-                  </span>
-                </div>
+                    <ChefHat className="w-4 h-4" />
+                    <span>給食情報</span>
+                  </button>
+                </Link>
+                <Link href="/water-spots">
+                  <button
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      router.pathname === '/water-spots'
+                        ? 'bg-solarized-base3 text-solarized-base02 shadow-sm'
+                        : 'text-solarized-base01 hover:text-solarized-base02 hover:bg-solarized-base2'
+                    }`}
+                  >
+                    <Droplets className="w-4 h-4" />
+                    <span>給水スポット</span>
+                  </button>
+                </Link>
               </div>
+
+              {/* 地区選択（給食情報ページでのみ表示） */}
+              {router.pathname === '/' &&
+                selectedDistrict &&
+                setSelectedDistrict && (
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    {/* 地区選択セレクトボックス */}
+                    <div className="relative">
+                      <select
+                        value={selectedDistrict}
+                        onChange={e => setSelectedDistrict(e.target.value)}
+                        className="appearance-none bg-solarized-base3 border border-solarized-base1 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-8 sm:pr-10 text-sm sm:text-base font-medium text-solarized-base02 hover:border-solarized-base00 focus:outline-none focus:ring-2 focus:ring-solarized-blue focus:border-transparent shadow-sm min-w-[160px] sm:min-w-[200px]"
+                        aria-label="給食センター地区を選択"
+                      >
+                        {districts.map(district => (
+                          <option key={district.id} value={district.id}>
+                            {district.shortName}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 pointer-events-none">
+                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-solarized-base0" />
+                      </div>
+                    </div>
+
+                    {/* 選択中の地区詳細情報 */}
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-solarized-base01 hidden lg:flex">
+                      <span className="font-medium">
+                        {
+                          districts.find(d => d.id === selectedDistrict)
+                            ?.description
+                        }
+                      </span>
+                      <span className="text-solarized-base0">•</span>
+                      <span className="text-solarized-base00">
+                        対象エリア:{' '}
+                        {districts.find(d => d.id === selectedDistrict)?.area}
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

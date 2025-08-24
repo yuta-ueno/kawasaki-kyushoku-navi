@@ -30,33 +30,49 @@ const getDayColor = dayOfWeek => {
   )
 }
 
-const MenuCard = ({ debugDate, isToday = false }) => {
+const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
   const { selectedSchool } = useSchoolSelection()
-  const { menu, loading, error, refresh, isEmpty } = useTodayMenu(
+  const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
     selectedSchool,
     debugDate
   )
 
-  // メニューアイテムの処理（簡素化）
+  // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
+  const menu = menuData || fetchedMenu
+
+  // メニューアイテムの処理（最適化版）
   const menuItems = React.useMemo(() => {
+
     if (!menu?.menu) return []
 
-    // 新しいデータ構造を優先
+    // 新しいデータ構造を優先（items配列）
     if (Array.isArray(menu.menu.items)) {
       return menu.menu.items.filter(item => 
         item && item.trim() && item.trim() !== 'ぎゅうにゅう'
       )
     }
 
-    // 古いデータ構造のフォールバック
-    if (!menu.menu.description) return []
-    
-    return menu.menu.description
-      .split(/[\n\s　]+/)
-      .filter(item => item.trim() && item.trim() !== 'ぎゅうにゅう')
+    // description文字列の処理
+    if (typeof menu.menu.description === 'string' && menu.menu.description.trim()) {
+      return menu.menu.description
+        .split(/[\n\r\s　,、]+/)
+        .filter(item => item.trim() && item.trim() !== 'ぎゅうにゅう')
+    }
+
+    // その他の可能な構造
+    if (typeof menu.menu === 'string' && menu.menu.trim()) {
+      return menu.menu
+        .split(/[\n\r\s　,、]+/)
+        .filter(item => item.trim() && item.trim() !== 'ぎゅうにゅう')
+    }
+
+    return []
   }, [menu])
 
-  if (loading) {
+  // 直接データが渡された場合は、ローディング状態をスキップ
+  const isUsingDirectData = !!menuData
+
+  if (!isUsingDirectData && loading) {
     return (
       <div
         className="bg-solarized-base2 rounded-2xl p-6 animate-pulse min-h-[420px] flex items-center justify-center"
@@ -82,7 +98,7 @@ const MenuCard = ({ debugDate, isToday = false }) => {
   const isDataNotFound = error && errorKeywords.notFound.some(keyword => error.includes(keyword))
   const isRateLimit = error && errorKeywords.rateLimit.some(keyword => error.includes(keyword))
 
-  if (isRateLimit) {
+  if (!isUsingDirectData && isRateLimit) {
     return (
       <div
         className="bg-solarized-base2 rounded-2xl p-6 border-2 border-solarized-orange min-h-[420px] flex items-center justify-center"
@@ -105,7 +121,7 @@ const MenuCard = ({ debugDate, isToday = false }) => {
     )
   }
 
-  if (error && !isDataNotFound) {
+  if (!isUsingDirectData && error && !isDataNotFound) {
     return (
       <div
         className="bg-solarized-base2 rounded-2xl p-6 border-2 border-solarized-red min-h-[420px] flex items-center justify-center"
@@ -128,7 +144,7 @@ const MenuCard = ({ debugDate, isToday = false }) => {
     )
   }
 
-  if (isEmpty || !menu || isDataNotFound) {
+  if (!menu || (!isUsingDirectData && (isEmpty || isDataNotFound))) {
     return (
       <div className="min-h-[420px] flex items-center justify-center">
         <div className="text-center">
@@ -156,10 +172,22 @@ const MenuCard = ({ debugDate, isToday = false }) => {
 
   const dayColor = getDayColor(menu.dayOfWeek)
 
-  // 日付フォーマット（簡素化）
+  // 日付フォーマット（JST対応）
   const getDateParts = (dateStr) => {
     if (!dateStr) return { day: '?', month: '?' }
-    const date = new Date(dateStr)
+    
+    // YYYY-MM-DD形式の日付文字列をJSTで処理
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (dateMatch) {
+      const [, year, month, day] = dateMatch
+      return { 
+        day: parseInt(day, 10), 
+        month: parseInt(month, 10) 
+      }
+    }
+    
+    // フォールバック：通常のDate処理
+    const date = new Date(dateStr + 'T00:00:00+09:00') // JSTで解釈
     return date.toString() === 'Invalid Date' 
       ? { day: '?', month: '?' }
       : { day: date.getDate(), month: date.getMonth() + 1 }

@@ -79,7 +79,12 @@ export const useTodayMenu = (district = 'A', date) => {
 export const useMonthlyMenus = (year, month, district = 'A') => {
   const currentDate = new Date()
   const targetYear = year || currentDate.getFullYear()
-  const targetMonth = month || currentDate.getMonth() + 1
+  let targetMonth = month || currentDate.getMonth() + 1
+  
+  // 8月の場合は9月分の献立を表示
+  if (targetMonth === 8 && targetYear === 2025) {
+    targetMonth = 9
+  }
 
   const apiUrl = `/api/menu/monthly?year=${targetYear}&month=${targetMonth}&district=${district}`
 

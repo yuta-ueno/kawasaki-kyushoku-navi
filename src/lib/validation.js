@@ -46,14 +46,23 @@ export const todaySchema = z.object({
   if (data.date) {
     const inputDate = new Date(data.date)
     const today = new Date()
-    const maxDate = new Date()
-    maxDate.setDate(today.getDate() + 7) // 1週間後まで許可
+    const currentMonth = today.getMonth() + 1
+    const currentYear = today.getFullYear()
     
+    // 8月の場合は9月のデータも許可
+    if (currentMonth === 8 && currentYear === 2025) {
+      const maxDate = new Date('2025-09-30') // 2025年9月30日まで許可
+      return inputDate <= maxDate
+    }
+    
+    // それ以外は1週間後まで許可
+    const maxDate = new Date()
+    maxDate.setDate(today.getDate() + 7)
     return inputDate <= maxDate
   }
   return true
 }, {
-  message: '日付は1週間以内の範囲で指定してください',
+  message: '日付は指定可能な範囲内で入力してください',
   path: ['date']
 })
 

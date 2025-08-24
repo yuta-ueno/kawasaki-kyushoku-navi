@@ -12,7 +12,13 @@ export default function HomePage() {
   // 現在の年月を取得
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
-  const currentMonth = currentDate.getMonth() + 1
+  let currentMonth = currentDate.getMonth() + 1
+  
+  // 8月の場合は9月として表示
+  let displayMonth = currentMonth
+  if (currentMonth === 8 && currentYear === 2025) {
+    displayMonth = 9
+  }
 
   // SWR統合フックを使用
   const app = useKawasakiMenuApp()
@@ -196,7 +202,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-solarized-base02">
-                    {currentYear}年{currentMonth}月の給食献立
+                    {currentYear}年{displayMonth}月の給食献立
                   </h2>
                   <p className="text-solarized-base01">
                     川崎市{app.selectedSchool}地区小学校の献立表
@@ -244,6 +250,7 @@ export default function HomePage() {
                           key={`${menu.date}-${menu.district}-${index}`}
                           debugDate={menu.date}
                           isToday={false}
+                          menuData={menu}
                         />
                       ))}
                   </div>
