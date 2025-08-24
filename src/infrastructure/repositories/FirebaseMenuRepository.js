@@ -209,7 +209,7 @@ export class FirebaseMenuRepository extends MenuRepository {
    */
   async getSpecialMenus(district, limit = 10) {
     try {
-      const q = query(
+      let q = query(
         collection(db, this.collectionName),
         where('district', '==', district),
         where('hasSpecialMenu', '==', true),

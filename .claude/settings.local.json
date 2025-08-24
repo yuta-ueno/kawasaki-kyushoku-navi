@@ -18,7 +18,8 @@
       "Bash(for file in *_ku_water_spots.json nakahara_water_spots.json)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(for file in takatsu_ku_water_spots.json miyamae_ku_water_spots.json tama_ku_water_spots.json asao_ku_water_spots.json)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(vercel inspect:*)"
     ],
     "deny": [],
     "ask": []
