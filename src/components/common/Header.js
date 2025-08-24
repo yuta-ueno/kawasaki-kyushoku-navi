@@ -18,23 +18,31 @@ const NotificationPopup = ({ isOpen, onClose }) => {
   const [notifications] = useState([
     {
       id: 1,
-      type: 'maintenance',
-      title: 'メンテナンス完了のお知らせ',
-      message:
-        'システムメンテナンスが完了しました。より快適にご利用いただけるよう改善を行いました。',
+      type: 'update',
+      title: '給水スポット表示機能（ベータ版）',
+      message: '川崎市の給水スポットの表示機能を追加しました。',
       date: '2025-08-24',
       isNew: true,
     },
     {
       id: 2,
       type: 'maintenance',
-      title: '9月の給食について',
-      message: '9月の給食データを更新しました。',
-      date: '2025-07-18',
+      title: 'メンテナンス完了のお知らせ',
+      message:
+        'システムメンテナンスが完了しました。より快適にご利用いただけるよう改善を行いました。',
+      date: '2025-08-24',
       isNew: false,
     },
     {
       id: 3,
+      type: 'maintenance',
+      title: '9月の給食について',
+      message: '9月の給食データを更新しました。',
+      date: '2025-08-24',
+      isNew: false,
+    },
+    {
+      id: 4,
       type: 'update',
       title: 'アプリリリース（テスト版）',
       message: 'かわさき給食ナビの運用テストバージョンを公開しました。',
