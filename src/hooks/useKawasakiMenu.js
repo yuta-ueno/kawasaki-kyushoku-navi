@@ -1,5 +1,4 @@
-// hooks/useKawasakiMenu.js - 月1回更新最適化版
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { swrConfig } from '../lib/swr-config'
 
@@ -42,21 +41,14 @@ export const useTodayMenu = (district = 'A', date) => {
   const apiUrl = date !== null ? `/api/menu/today?date=${targetDate}&district=${district}` : null
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
-    // 🔄 給食データの実態に合わせた設定 - 静的な更新間隔に変更
-    refreshInterval: 6 * 60 * 60 * 1000, // 6時間間隔で固定
-
-    // 📱 タブ切り替え時の自動更新を無効化
-    revalidateOnFocus: false, // タブ切り替え時の自動更新を停止
-    revalidateOnReconnect: true, // ネット復活時
-    revalidateIfStale: false, // 古いデータでも許容（月1更新なので）
-
-    // 🚨 エラー処理は簡素化・リトライ無効化
-    errorRetryCount: 0, // リトライを無効化（再レンダリング防止）
-    errorRetryInterval: false, // リトライ間隔も無効化
-    loadingTimeout: 15000, // 15秒でタイムアウト
-
-    // 📊 長期キャッシュ
-    dedupingInterval: 30 * 60 * 1000, // 30分間は重複リクエスト防止
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: true,
+    revalidateIfStale: false,
+    errorRetryCount: 0,
+    errorRetryInterval: false,
+    loadingTimeout: 15000,
+    dedupingInterval: 30 * 60 * 1000
   })
 
   return {
@@ -67,9 +59,8 @@ export const useTodayMenu = (district = 'A', date) => {
     hasData: !!data,
     isEmpty: data === null,
 
-    // 📊 追加情報 - 毎回新しいDateオブジェクト作成を防ぐ
-    lastUpdated: data ? data.timestamp || null : null,
-    nextCheck: null, // 固定間隔のため次回チェック時刻計算は不要
+    lastUpdated: data?.timestamp || null,
+    nextCheck: null
   }
 }
 
@@ -87,20 +78,13 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
   const apiUrl = `/api/menu/monthly?year=${targetYear}&month=${targetMonth}&district=${district}`
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
-    // 🔄 月間データは再レンダリング防止のため更新停止
-    refreshInterval: 0, // 自動更新を完全停止
-
-    // 📱 ユーザー操作時のみ更新
-    revalidateOnFocus: false, // フォーカス時は更新しない
-    revalidateOnReconnect: false, // 再接続時も更新しない
-    revalidateIfStale: false, // 古いデータを許容
-
-    // 🚨 エラー処理は最小限・リトライ無効化
-    errorRetryCount: 0, // リトライを無効化（再レンダリング防止）
-    errorRetryInterval: false, // リトライ間隔も無効化
-
-    // 📊 超長期キャッシュ
-    dedupingInterval: 24 * 60 * 60 * 1000, // 24時間は重複リクエスト防止
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    errorRetryCount: 0,
+    errorRetryInterval: false,
+    dedupingInterval: 24 * 60 * 60 * 1000
   })
 
   const processedData = useMemo(() => {
@@ -133,14 +117,6 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
     const calendarData = {}
     const menusByDay = {}
 
-    // デバッグ情報（開発環境のみ）
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📊 月間データ処理:', {
-        rawData: data,
-        menusArrayLength: menusArray.length,
-        menusArrayType: Array.isArray(menusArray) ? 'array' : typeof menusArray,
-      })
-    }
 
     menusArray.forEach(menu => {
       if (menu.date) {
@@ -175,9 +151,8 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
     totalMenuDays: processedData.totalMenuDays,
     specialMenuCount: processedData.specialMenuCount,
 
-    // 📊 追加情報 - 毎回新しいDateオブジェクト作成を防ぐ
-    lastUpdated: data ? data.timestamp || null : null,
-    nextCheck: null, // 自動更新停止のため次回チェック時刻は不要
+    lastUpdated: data?.timestamp || null,
+    nextCheck: null
   }
 }
 

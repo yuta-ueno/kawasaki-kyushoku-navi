@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import {
   Calendar,
   Clock,
@@ -43,26 +43,21 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
   const menu = menuData || fetchedMenu
 
-  // メニューアイテムの処理（最適化版）
-  const menuItems = React.useMemo(() => {
-
+  const menuItems = useMemo(() => {
     if (!menu?.menu) return []
 
-    // 新しいデータ構造を優先（items配列）
     if (Array.isArray(menu.menu.items)) {
       return menu.menu.items.filter(item => 
         item && item.trim() && item.trim() !== 'ぎゅうにゅう'
       )
     }
 
-    // description文字列の処理
     if (typeof menu.menu.description === 'string' && menu.menu.description.trim()) {
       return menu.menu.description
         .split(/[\n\r\s　,、]+/)
         .filter(item => item.trim() && item.trim() !== 'ぎゅうにゅう')
     }
 
-    // その他の可能な構造
     if (typeof menu.menu === 'string' && menu.menu.trim()) {
       return menu.menu
         .split(/[\n\r\s　,、]+/)

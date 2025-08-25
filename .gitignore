@@ -30,8 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# Environment files - CRITICAL SECURITY FILES
 .env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.sentry-build-plugin
 
 # vercel
 .vercel
@@ -40,7 +45,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# かわさき給食ナビ 固有
+# かわさき給食ナビ 固有 - セキュリティ重要ファイル
 .env.local
 .env*.local
 .vercel
@@ -48,13 +53,47 @@ next-env.d.ts
 .next/
 out/
 
-# Editor
+# Editor configurations
 .vscode/settings.json
+.vscode/launch.json
 .idea/
+*.swp
+*.swo
+*~
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Sentry Config File
-.env.sentry-build-plugin
+# Security and sensitive files
+*.pem
+*.p12
+*.key
+*.cert
+*.csr
+config/secrets.json
+secrets/
+private/
+
+# Logs and temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.eslintcache
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output

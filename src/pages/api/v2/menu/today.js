@@ -22,7 +22,7 @@ import {
   handlePreflightRequest,
   logCorsAccess,
 } from '../../../../lib/cors-config.js';
-import { checkRateLimit } from '../../../../lib/rate-limit.js';
+import { rateLimit } from '../../../../lib/rate-limit.js';
 
 export default async function handler(req, res) {
   const requestId = generateRequestId();
@@ -51,8 +51,14 @@ export default async function handler(req, res) {
     }
 
     // 4. レート制限チェック
-    const rateLimitResult = await checkRateLimit(req);
-    checkRateLimitResult(rateLimitResult, 10, 60);
+    const rateLimitResult = await rateLimit(req);
+    if (!rateLimitResult.success) {
+      return res.status(429).json({
+        success: false,
+        error: 'Too Many Requests',
+        metadata: { requestId, timestamp: new Date().toISOString() }
+      });
+    }
 
     // 5. 入力値検証
     const validationResult = validateInput(todaySchema, req.query, {
@@ -82,7 +88,7 @@ export default async function handler(req, res) {
     // レート制限ヘッダ
     res.setHeader('X-RateLimit-Limit', '10');
     res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
-    res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime.toString());
+    res.setHeader('X-RateLimit-Reset', Math.ceil(Date.now() / 1000) + 60);
 
     // 7. クエリパラメータをリクエストに追加
     req.validatedQuery = { date, district };

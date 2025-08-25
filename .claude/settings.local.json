@@ -19,7 +19,8 @@
       "Bash(do echo \"=== $file ===\")",
       "Bash(for file in takatsu_ku_water_spots.json miyamae_ku_water_spots.json tama_ku_water_spots.json asao_ku_water_spots.json)",
       "Bash(firebase deploy:*)",
-      "Bash(vercel inspect:*)"
+      "Bash(vercel inspect:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []

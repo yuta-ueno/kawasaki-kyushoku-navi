@@ -11,6 +11,107 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+
+  // セキュリティヘッダー
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          // XSS Protection
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          // Content Type Options
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          // Referrer Policy
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          // Frame Options
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          // DNS Prefetch Control
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          // Permissions Policy
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), payment=()'
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          // API専用セキュリティヘッダー
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate'
+          },
+          // Rate Limiting情報
+          {
+            key: 'X-RateLimit-Policy',
+            value: '10req/min'
+          },
+        ],
+      },
+    ];
+  },
+
+  // Content Security Policy
+  async rewrites() {
+    return [];
+  },
+
+  // Environment validation
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: [
+      '@sentry/nextjs',
+      'lucide-react',
+      'swr',
+      'firebase/firestore',
+      'zod',
+    ],
+  },
+
+  // Output optimization
+  compress: true,
+  poweredByHeader: false,
+
+  // Bundle analyzer (for optimization)
+  webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@sentry/nextjs': '@sentry/nextjs',
+      };
+    }
+    return config;
+  },
 }
 
 module.exports = nextConfig

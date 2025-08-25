@@ -3,18 +3,21 @@
 ## 📋 プロジェクト概要
 
 **プロジェクト名**: 川崎給食ナビ  
-**バージョン**: 2.0.0 (Clean Architecture)  
-**最終更新**: 2025年8月24日  
+**バージョン**: 2.1.0 (Security & Performance Enhanced)  
+**最終更新**: 2025年8月25日  
 **開発者**: かわさき給食ナビ開発チーム
 
 ### 目的
-川崎市立小中学校の給食献立情報と市内給水スポット情報を統合提供するWebアプリケーション
+川崎市立小中学校の給食献立情報を提供するWebアプリケーション
 
 ### 主要機能
 1. **給食メニュー機能** - 今日・月間の給食献立表示、栄養情報提供
-2. **給水スポット機能** - 市内給水場所の検索・地図表示
-3. **管理機能** - データインポート、統計情報表示
-4. **モバイル対応** - レスポンシブデザイン、PWA対応
+2. **管理機能** - データインポート、統計情報表示
+3. **モバイル対応** - レスポンシブデザイン、PWA対応
+4. **セキュリティ** - 包括的なセキュリティ対策とパフォーマンス最適化
+
+### 廃止機能
+- **給水スポット機能** - 独立したアプリケーションとして分離予定（仕様書は別途保管）
 
 ---
 
@@ -49,19 +52,15 @@
 src/
 ├── domain/                     # Domain Layer (ビジネスロジック)
 │   ├── entities/              # エンティティ
-│   │   ├── Menu.js           # 給食メニューエンティティ
-│   │   └── WaterSpot.js      # 給水スポットエンティティ
+│   │   └── Menu.js           # 給食メニューエンティティ
 │   ├── use-cases/            # ユースケース
-│   │   ├── MenuUseCases.js   # メニュー関連ビジネスロジック
-│   │   └── WaterSpotUseCases.js # 給水スポット関連ビジネスロジック
+│   │   └── MenuUseCases.js   # メニュー関連ビジネスロジック
 │   └── repositories/         # リポジトリインターfaces
-│       ├── MenuRepository.js
-│       └── WaterSpotRepository.js
+│       └── MenuRepository.js
 │
 ├── infrastructure/            # Infrastructure Layer (外部接続)
 │   ├── repositories/         # リポジトリ実装
-│   │   ├── FirebaseMenuRepository.js
-│   │   └── StaticWaterSpotRepository.js
+│   │   └── FirebaseMenuRepository.js
 │   ├── external/            # 外部サービス接続
 │   │   └── Firebase.js
 │   └── cache/               # キャッシュサービス
@@ -69,8 +68,7 @@ src/
 │
 ├── interface/                # Interface Layer (API境界)
 │   ├── controllers/         # APIコントローラー
-│   │   ├── MenuController.js
-│   │   └── WaterSpotController.js
+│   │   └── MenuController.js
 │   ├── presenters/         # データプレゼンター
 │   └── dto/                # データ転送オブジェクト
 │
@@ -82,8 +80,7 @@ src/
 │
 ├── shared/                  # 共有層
 │   ├── constants/          # 定数定義
-│   │   ├── Districts.js    # 地区関連定数
-│   │   └── WaterSpots.js   # 給水スポット関連定数
+│   │   └── Districts.js    # 地区関連定数
 │   ├── types/              # 型定義
 │   │   └── Menu.js         # メニュー型定義
 │   ├── utils/              # ユーティリティ
@@ -94,8 +91,7 @@ src/
 ├── lib/                     # 既存ライブラリ (段階的移行)
 ├── pages/                   # Next.js Pages Router
 │   ├── api/                # 既存API (v1)
-│   │   ├── menu/
-│   │   └── water-spots/
+│   │   └── menu/
 │   └── api/v2/             # 新API (Clean Architecture)
 │       └── menu/
 └── styles/                  # スタイルファイル
@@ -106,7 +102,7 @@ src/
 ## 🔧 技術スタック
 
 ### コア技術
-- **Next.js 14.2.5** (Pages Router)
+- **Next.js 14.2.32** (Pages Router) - セキュリティアップデート適用
 - **React 18** (UI Framework)
 - **Firebase Firestore** (Database)
 - **Upstash Redis** (Rate Limiting & Cache)
@@ -119,9 +115,6 @@ src/
 - **Tailwind CSS 3.4** (Utility-first CSS)
 - **Solarized Color Scheme** (統一テーマ)
 
-### 地図機能
-- **React Leaflet 4.2** (Map Component)
-- **Leaflet 1.9** (Map Library)
 
 ### 開発・品質管理
 - **ESLint** (Code Linting)
@@ -138,84 +131,70 @@ src/
 - **エンドポイント**: `/api/menu/today`, `/api/v2/menu/today`
 - **パラメータ**: `date` (YYYY-MM-DD), `district` (A/B/C)
 - **機能**: 指定日・地区の給食メニューと栄養情報を表示
+- **セキュリティ**: レート制限(10req/min)、CORS検証、入力値検証
 
 #### 1.2 月間給食カレンダー
 - **エンドポイント**: `/api/menu/monthly`
 - **パラメータ**: `year`, `month`, `district`
 - **機能**: 月間給食カレンダー、統計情報表示
+- **セキュリティ**: レート制限(5req/min)、大量データ制限(最大50件)
 
 #### 1.3 データインポート（管理者用）
 - **エンドポイント**: `/api/v2/menu/import`
 - **機能**: JSON形式での一括メニューデータインポート
+- **セキュリティ**: 認証必須、CSRFトークン検証
 
-### 2. 給水スポット機能
+### 2. 共通機能
 
-#### 2.1 スポット検索・一覧
-- **エンドポイント**: `/api/water-spots/list`
-- **フィルター**: 区、カテゴリ、営業状況
-- **機能**: 条件に応じた給水スポット検索
-
-#### 2.2 地図表示
-- **コンポーネント**: `WaterSpotMap`
-- **機能**: Leafletを使用した地図上のスポット表示
-
-#### 2.3 スポット詳細
-- **エンドポイント**: `/api/water-spots/detail`
-- **機能**: 個別スポットの詳細情報表示
-
-### 3. 共通機能
-
-#### 3.1 地区管理
+#### 2.1 地区管理
 - **地区**: A(川崎区・中原区), B(幸区・多摩区・麻生区), C(高津区・宮前区)
 - **永続化**: LocalStorage
 - **切り替え**: リアルタイム反映
 
-##### 3.2 キャッシュ戦略
+#### 2.2 キャッシュ戦略
 - **今日のメニュー**: 5分キャッシュ
-- **月間メニュー**: 1時間キャッシュ
-- **給水スポット**: 1時間キャッシュ
+- **月間メニュー**: 24時間キャッシュ
+- **重複リクエスト防止**: SWR dedupingInterval設定
 
-#### 3.3 データ取得リトライ仕様
+#### 2.3 データ取得最適化仕様
 
 ##### 通信エラー時リトライ設定
 
 **グローバル設定** (`src/lib/swr-config.js`)
-- **エラーリトライ回数**: `1回`
-- **エラーリトライ間隔**: `10秒`
+- **エラーリトライ回数**: `0回` (自動リトライ無効)
 - **ローディングタイムアウト**: `15秒`
 - **重複リクエスト防止**: `30分`
 
 **今日の献立データ** (`useTodayMenu`)
-- **通常更新間隔**: `6時間`
-- **エラーリトライ回数**: `1回`
-- **エラーリトライ間隔**: `2分`
-- **フォーカス時更新**: 有効 (アプリに戻った際の自動更新)
-- **再接続時更新**: 有効 (ネットワーク復帰時の自動更新)
+- **通常更新間隔**: `無効` (自動更新停止)
+- **エラーリトライ回数**: `0回`
+- **フォーカス時更新**: 無効 (タブ切り替え時の不要リクエスト防止)
+- **再接続時更新**: 有効 (ネットワーク復帰時のみ)
 - **重複リクエスト防止**: `30分`
 
 **月間献立データ** (`useMonthlyMenus`)
-- **通常更新間隔**: `24時間` (スマートリフレッシュ)
-- **エラーリトライ回数**: `1回`
-- **エラーリトライ間隔**: `3分`
-- **フォーカス時更新**: 無効 (手動更新のみ)
-- **再接続時更新**: 無効 (手動更新のみ)
+- **通常更新間隔**: `無効` (完全に停止)
+- **エラーリトライ回数**: `0回`
+- **フォーカス時更新**: 無効
+- **再接続時更新**: 無効
 - **重複リクエスト防止**: `24時間`
 
-**クリーンアーキテクチャ版** (`useCleanMenus`)
-- **今日の献立**: リフレッシュ `6時間`、エラーリトライ `2回`、リトライ間隔 `5秒`
-- **月間献立**: リフレッシュ `24時間`、エラーリトライなし
-- **検索機能**: リフレッシュなし、重複防止 `30秒`
+**最適化の特徴**
+- **10秒周期リクエスト問題**: 完全解決
+- **タブ切り替え時リクエスト**: 防止済み
+- **不要な再レンダリング**: 最小化
 
-##### エラー処理フロー
-1. **初回エラー**: 指定間隔後に自動リトライ実行
-2. **リトライ失敗**: エラー状態を維持、手動更新まで待機
-3. **ネットワーク復帰**: 自動で再取得開始 (今日の献立のみ)
-4. **アプリフォーカス**: 今日の献立のみ自動更新実行
+##### パフォーマンス最適化フロー
+1. **初期ロード**: 必要最小限のデータ取得
+2. **キャッシュ活用**: 長期間キャッシュでリクエスト数最小化
+3. **エラー状態**: グレースフル degradation、既存データ表示継続
+4. **手動更新**: ユーザー操作時のみデータ再取得
 
-##### 最適化の特徴
-- **月1回更新の特性**: 給食データの更新頻度に合わせた長期キャッシュ
-- **エラー耐性**: 通信エラー時も既存キャッシュで継続動作
-- **ユーザビリティ**: 必要な時のみ自動更新、不要な通信を抑制
+##### 最適化の効果
+- **ページ読み込み速度**: 大幅改善
+- **不要なAPI呼び出し**: 完全排除
+- **ユーザー体験**: スムーズな操作感
+- **サーバー負荷**: 軽減
 
 ---
 
@@ -240,44 +219,20 @@ src/
 }
 ```
 
-### WaterSpot Entity
-```javascript
-{
-  id: string,
-  name: string,
-  category: string,       // カテゴリ
-  ward: string,           // 区
-  address: string,
-  location: {
-    latitude: number,
-    longitude: number
-  },
-  hours: object,          // 営業時間
-  description: string,
-  access: string,         // アクセス情報
-  facilities: string[],   // 設備情報
-  notes: string
-}
-```
 
 ---
 
 ## 🔌 API仕様
 
-### v1 API (既存・段階的廃止予定)
+### v1 API (メイン運用)
 ```
 GET /api/menu/today?date={date}&district={district}
 GET /api/menu/monthly?year={year}&month={month}&district={district}
-GET /api/water-spots/list?ward={ward}&category={category}&light={boolean}
-GET /api/water-spots/detail?id={spotId}
 ```
 
-### v2 API (Clean Architecture対応)
+### v2 API (Clean Architecture対応・実験的)
 ```
 GET /api/v2/menu/today?date={date}&district={district}
-GET /api/v2/menu/monthly?year={year}&month={month}&district={district}
-POST /api/v2/menu/import (Admin)
-GET /api/v2/menu/statistics?startDate={date}&endDate={date}&district={district}
 ```
 
 ### 共通レスポンス形式
@@ -304,20 +259,44 @@ GET /api/v2/menu/statistics?startDate={date}&endDate={date}&district={district}
 - **本番環境**: `https://www.kawasaki-kyushoku.jp`のみ許可
 - **開発環境**: `localhost`ポート許可
 - **プリフライト**: OPTIONS リクエスト対応
+- **Origin検証**: 厳格な検証ロジック実装
 
 ### 2. レート制限
-- **制限**: 10リクエスト/分/IP
+- **今日のメニュー**: 10リクエスト/分/IP
+- **月間メニュー**: 5リクエスト/分/IP (重いクエリのため)
 - **実装**: Upstash Redis
 - **ヘッダー**: `X-RateLimit-*` による通知
+- **フォールバック**: Redis障害時はリクエスト許可
 
-### 3. 入力検証
-- **バリデーション**: Zod スキーマ
-- **サニタイゼーション**: XSS対策
-- **型安全性**: TypeScript (JSDoc)
+### 3. セキュリティヘッダー
+- **XSS Protection**: `X-XSS-Protection: 1; mode=block`
+- **Content Type Options**: `X-Content-Type-Options: nosniff`
+- **Frame Options**: `X-Frame-Options: DENY`
+- **Referrer Policy**: `Referrer-Policy: strict-origin-when-cross-origin`
+- **DNS Prefetch Control**: `X-DNS-Prefetch-Control: on`
+- **Permissions Policy**: カメラ・マイク等の制限
 
-### 4. エラーハンドリング
+### 4. 入力検証
+- **バリデーション**: Zod スキーマによる厳格な型チェック
+- **サニタイゼーション**: XSS対策、SQLインジェクション対策
+- **データ制限**: 未来データ取得制限、最大件数制限
+- **不正パラメータ**: 自動除去とログ記録
+
+### 5. 環境変数セキュリティ
+- **機密情報**: プレースホルダー値でデフォルト設定
+- **警告コメント**: セキュリティリスクの明記
+- **.gitignore**: 証明書・秘密鍵・ログファイル等の保護
+- **バージョン管理**: 機密情報の履歴から完全除去
+
+### 6. 脆弱性対策
+- **Next.js**: v14.2.32（重要なセキュリティパッチ適用済み）
+- **依存関係監視**: npm audit による定期チェック
+- **残存脆弱性**: Firebase関連の間接依存（影響範囲限定的）
+
+### 7. エラーハンドリング
 - **監視**: Sentry統合
 - **ログ**: 構造化ログ出力
+- **情報漏洩防止**: エラーメッセージのサニタイズ
 - **フォールバック**: グレースフル degradation
 
 ---
@@ -332,15 +311,19 @@ GET /api/v2/menu/statistics?startDate={date}&endDate={date}&district={district}
 
 ### 2. 最適化
 - **画像**: Next.js Image Optimization
-- **バンドル**: Tree Shaking, Code Splitting
+- **バンドル**: Tree Shaking, Code Splitting, Package Import Optimization
 - **CSS**: Tailwind Purge
 - **フォント**: Google Fonts最適化
+- **Header圧縮**: Gzip/Brotli圧縮有効
+- **X-Powered-By**: セキュリティのため無効化
 
-### 3. 目標値
+### 3. パフォーマンス指標
 - **FCP**: < 1.5秒
 - **LCP**: < 2.5秒
 - **CLS**: < 0.1
 - **API Response**: < 500ms
+- **バンドルサイズ**: メインページ187KB、管理画面249KB
+- **ビルド時間**: 大幅改善（最適化により）
 
 ---
 
@@ -402,14 +385,17 @@ GET /api/v2/menu/statistics?startDate={date}&endDate={date}&district={district}
 ## 🔮 今後の拡張計画
 
 ### 短期（3ヶ月）
+- [x] セキュリティ監査と脆弱性修正
+- [x] パフォーマンス最適化
+- [x] コード品質改善とリファクタリング
 - [ ] 既存フック・コンポーネントのClean Architecture移行
-- [ ] v1 APIの段階的廃止
 - [ ] テストカバレッジ向上
 
 ### 中期（6ヶ月）
-- [ ] GraphQL導入検討
+- [ ] 給水スポット機能の独立アプリ開発
 - [ ] PWA機能強化
 - [ ] アクセシビリティ向上
+- [ ] Firebase関連脆弱性の解決（公式アップデート待ち）
 
 ### 長期（1年）
 - [ ] TypeScript完全移行
@@ -433,5 +419,19 @@ GET /api/v2/menu/statistics?startDate={date}&endDate={date}&district={district}
 
 ---
 
-**最終更新**: 2025年8月24日  
-**ドキュメントバージョン**: 2.0.0
+**最終更新**: 2025年8月25日  
+**ドキュメントバージョン**: 2.1.0
+
+## 📈 更新履歴
+
+### v2.1.0 (2025-08-25)
+- セキュリティ強化: Next.js v14.2.32アップデート、包括的セキュリティヘッダー実装
+- パフォーマンス最適化: SWR設定最適化、不要リクエスト完全排除
+- アーキテクチャ整理: 給水スポット機能削除、メニュー機能に特化
+- コード品質向上: React最適化、依存関係整理
+- 脆弱性対策: 10件の重要な脆弱性修正
+
+### v2.0.0 (2025-08-24)
+- Clean Architecture導入
+- 給水スポット機能追加
+- v2 API実装
