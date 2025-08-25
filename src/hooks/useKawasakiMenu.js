@@ -45,8 +45,8 @@ export const useTodayMenu = (district = 'A', date, enabled = true) => {
     // 🔄 給食データの実態に合わせた設定 - 静的な更新間隔に変更
     refreshInterval: 6 * 60 * 60 * 1000, // 6時間間隔で固定
 
-    // 📱 ユーザー操作時は即座に更新
-    revalidateOnFocus: true, // ユーザーがアプリに戻った時
+    // 📱 タブ切り替え時の自動更新を無効化
+    revalidateOnFocus: false, // タブ切り替え時の自動更新を停止
     revalidateOnReconnect: true, // ネット復活時
     revalidateIfStale: false, // 古いデータでも許容（月1更新なので）
 
