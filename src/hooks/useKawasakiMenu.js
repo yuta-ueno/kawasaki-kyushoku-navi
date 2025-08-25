@@ -50,9 +50,9 @@ export const useTodayMenu = (district = 'A', date) => {
     revalidateOnReconnect: true, // ネット復活時
     revalidateIfStale: false, // 古いデータでも許容（月1更新なので）
 
-    // 🚨 エラー処理は簡素化・長い間隔
-    errorRetryCount: 1, // リトライは1回のみ
-    errorRetryInterval: 2 * 60 * 1000, // 2分後にリトライ
+    // 🚨 エラー処理は簡素化・リトライ無効化
+    errorRetryCount: 0, // リトライを無効化（再レンダリング防止）
+    errorRetryInterval: false, // リトライ間隔も無効化
     loadingTimeout: 15000, // 15秒でタイムアウト
 
     // 📊 長期キャッシュ
@@ -95,9 +95,9 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
     revalidateOnReconnect: false, // 再接続時も更新しない
     revalidateIfStale: false, // 古いデータを許容
 
-    // 🚨 エラー処理は最小限・長い間隔
-    errorRetryCount: 1,
-    errorRetryInterval: 5 * 60 * 1000, // 5分後にリトライ
+    // 🚨 エラー処理は最小限・リトライ無効化
+    errorRetryCount: 0, // リトライを無効化（再レンダリング防止）
+    errorRetryInterval: false, // リトライ間隔も無効化
 
     // 📊 超長期キャッシュ
     dedupingInterval: 24 * 60 * 60 * 1000, // 24時間は重複リクエスト防止
@@ -294,16 +294,16 @@ export function useKawasakiMenuApp() {
     }
   }
 
-  // 月末のプリフェッチ（アプリ起動時）- 1回だけ実行
-  useEffect(() => {
-    if (isLoaded && isOnline && selectedSchool) {
-      const timer = setTimeout(() => {
-        prefetchNextMonthIfNeeded(selectedSchool)
-      }, 10000) // 10秒後に実行
-      return () => clearTimeout(timer)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, isOnline, selectedSchool]) // prefetchNextMonthIfNeeded を依存から除外
+  // 月末のプリフェッチ（アプリ起動時）- 削除（10秒後のリクエスト防止）
+  // useEffect(() => {
+  //   if (isLoaded && isOnline && selectedSchool) {
+  //     const timer = setTimeout(() => {
+  //       prefetchNextMonthIfNeeded(selectedSchool)
+  //     }, 10000) // 10秒後に実行
+  //     return () => clearTimeout(timer)
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isLoaded, isOnline, selectedSchool]) // prefetchNextMonthIfNeeded を依存から除外
 
   return {
     selectedSchool,

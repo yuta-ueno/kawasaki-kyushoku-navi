@@ -38,8 +38,8 @@ export const swrConfig = {
   // パフォーマンス設定（給食アプリ用に最適化）
   dedupingInterval: 30 * 60 * 1000, // 30分間の重複リクエスト防止
   loadingTimeout: 15000, // 15秒でローディング警告
-  errorRetryInterval: 10000, // エラー時のリトライ間隔（10秒）
-  errorRetryCount: 1, // 最大リトライ回数（1回のみ）
+  errorRetryInterval: 60000, // エラー時のリトライ間隔（60秒に変更）
+  errorRetryCount: 0, // エラーリトライを無効化（再レンダリング防止）
 
   // エラーハンドリング
   onError: (error, key) => {
