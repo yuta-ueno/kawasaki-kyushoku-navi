@@ -1,6 +1,6 @@
 // hooks/useKawasakiMenu.js - 月1回更新最適化版
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { useState, useEffect, useMemo } from 'react'
 import { swrConfig } from '../lib/swr-config'
 
 // JST基準で今日の日付を取得
@@ -221,7 +221,7 @@ export function useMenuPrefetch() {
   const { mutate } = useSWRConfig()
 
   // 月末に翌月データをプリフェッチ（useCallbackでメモ化して再レンダリング防止）
-  const prefetchNextMonthIfNeeded = React.useCallback(district => {
+  const prefetchNextMonthIfNeeded = useCallback(district => {
     const now = new Date()
     const dayOfMonth = now.getDate()
 
@@ -238,7 +238,7 @@ export function useMenuPrefetch() {
   }, [mutate])
 
   // 手動プリフェッチ（ユーザーが明示的に要求した場合）
-  const manualPrefetch = React.useCallback((district, targetDate) => {
+  const manualPrefetch = useCallback((district, targetDate) => {
     const apiUrl = `/api/menu/today?date=${targetDate}&district=${district}`
     return mutate(apiUrl, undefined, { revalidate: true })
   }, [mutate])
