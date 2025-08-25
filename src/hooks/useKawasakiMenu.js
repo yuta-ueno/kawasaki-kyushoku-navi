@@ -36,10 +36,10 @@ export function useSchoolSelection() {
 }
 
 // 📅 今日の献立取得（月1回更新最適化版）
-export const useTodayMenu = (district = 'A', date) => {
+export const useTodayMenu = (district = 'A', date, enabled = true) => {
   const targetDate = date || getTodayJST()
-  // dateがnullの場合はSWRを無効化（月間データ表示時の不要なリクエスト防止）
-  const apiUrl = date !== null ? `/api/menu/today?date=${targetDate}&district=${district}` : null
+  // dateがnullまたはenabledがfalseの場合はSWRを無効化
+  const apiUrl = (date !== null && enabled) ? `/api/menu/today?date=${targetDate}&district=${district}` : null
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
     // 🔄 給食データの実態に合わせた設定 - 静的な更新間隔に変更
@@ -74,7 +74,7 @@ export const useTodayMenu = (district = 'A', date) => {
 }
 
 // 📊 月間献立取得（月1回更新最適化版）
-export const useMonthlyMenus = (year, month, district = 'A') => {
+export const useMonthlyMenus = (year, month, district = 'A', enabled = true) => {
   const currentDate = new Date()
   const targetYear = year || currentDate.getFullYear()
   let targetMonth = month || currentDate.getMonth() + 1
@@ -84,7 +84,7 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
     targetMonth = 9
   }
 
-  const apiUrl = `/api/menu/monthly?year=${targetYear}&month=${targetMonth}&district=${district}`
+  const apiUrl = enabled ? `/api/menu/monthly?year=${targetYear}&month=${targetMonth}&district=${district}` : null
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
     // 🔄 月間データは再レンダリング防止のため更新停止
@@ -271,17 +271,18 @@ export function useOnlineStatus() {
 }
 
 // 🔄 統合フック（最適化版）
-export function useKawasakiMenuApp() {
+export function useKawasakiMenuApp(enabled = true) {
   const { selectedSchool, updateSchool, isLoaded } = useSchoolSelection()
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth() + 1
 
-  const todayMenu = useTodayMenu(selectedSchool)
+  const todayMenu = useTodayMenu(selectedSchool, null, enabled)
   const monthlyMenus = useMonthlyMenus(
     currentYear,
     currentMonth,
-    selectedSchool
+    selectedSchool,
+    enabled
   )
   const { prefetchNextMonthIfNeeded } = useMenuPrefetch()
   const isOnline = useOnlineStatus()

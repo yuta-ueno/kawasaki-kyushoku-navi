@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { Calendar, ChefHat, MapPin } from 'lucide-react'
 import { useKawasakiMenuApp } from '../hooks/useKawasakiMenu'
 import MenuCard from '../components/menu/MenuCard'
@@ -9,6 +10,8 @@ import StatsCards from '../components/common/StatsCards'
 import ErrorMessage from '../components/common/ErrorMessage'
 
 export default function HomePage() {
+  const router = useRouter()
+  
   // 現在の年月を取得
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
@@ -20,8 +23,9 @@ export default function HomePage() {
     displayMonth = 9
   }
 
-  // SWR統合フックを使用
-  const app = useKawasakiMenuApp()
+  // 給食情報ページでのみSWRフックを有効化
+  const isMenuPage = router.pathname === '/'
+  const app = useKawasakiMenuApp(isMenuPage)
 
   // 統計情報を計算（再レンダリング最適化）
   const stats = React.useMemo(() => {
@@ -189,7 +193,7 @@ export default function HomePage() {
 
             {/* 新しいMenuCardコンポーネントを使用（内部でSWRフックを呼び出し） */}
             <div className="max-w-2xl">
-              <MenuCard isToday={true} />
+              <MenuCard isToday={true} enabled={isMenuPage} />
             </div>
           </section>
 
