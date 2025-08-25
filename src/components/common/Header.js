@@ -217,29 +217,21 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                 <h1 className="text-base sm:text-xl font-bold text-solarized-base02 leading-tight truncate">
                   かわさき給食ナビ
                 </h1>
-                <p className="text-xs sm:text-xs text-solarized-base01 leading-tight hidden sm:block">
-                  川崎市の給食を、スマホで簡単チェック
-                </p>
-                <p className="text-xs text-solarized-base01 leading-tight sm:hidden">
-                  川崎市の給食情報
+                <p className="text-xs sm:text-sm text-solarized-base01 leading-tight">
+                  川崎市の給食献立情報 {(() => {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const weekday = now.toLocaleDateString('ja-JP', { weekday: 'short' });
+                    return `${year}年${month}月${day}日(${weekday})`;
+                  })()}
                 </p>
               </div>
             </div>
 
             {/* 右側のコントロール */}
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              {/* 現在の日時表示（デスクトップのみ） */}
-              <div className="hidden lg:flex items-center space-x-2 text-sm text-solarized-base01">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  {new Date().toLocaleDateString('ja-JP', {
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'short',
-                  })}
-                </span>
-              </div>
-
               {/* 通知アイコン（機能追加） */}
               <button
                 onClick={() => {
@@ -261,21 +253,8 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
         <div className="bg-solarized-base2 border-t border-solarized-base1">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between h-auto sm:h-14 py-2 sm:py-0">
-              {/* ナビゲーションタブ */}
-              <div className="flex space-x-1 bg-solarized-base1 rounded-lg p-1">
-                <Link href="/">
-                  <button
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      router.pathname === '/'
-                        ? 'bg-solarized-base3 text-solarized-base02 shadow-sm'
-                        : 'text-solarized-base01 hover:text-solarized-base02 hover:bg-solarized-base2'
-                    }`}
-                  >
-                    <ChefHat className="w-4 h-4" />
-                    <span>給食情報</span>
-                  </button>
-                </Link>
-              </div>
+              {/* 空のスペース（ナビゲーションタブを削除） */}
+              <div></div>
 
               {/* 地区選択（給食情報ページでのみ表示） */}
               {router.pathname === '/' &&
