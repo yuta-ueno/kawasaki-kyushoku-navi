@@ -11,12 +11,12 @@ import ErrorMessage from '../components/common/ErrorMessage'
 
 export default function HomePage() {
   const router = useRouter()
-  
+
   // 現在の年月を取得
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
   let currentMonth = currentDate.getMonth() + 1
-  
+
   // 8月の場合は9月として表示
   let displayMonth = currentMonth
   if (currentMonth === 8 && currentYear === 2025) {
@@ -167,27 +167,8 @@ export default function HomePage() {
 
           {/* 今日の給食セクション */}
           <section className="mb-12">
-            <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-solarized-orange to-solarized-red p-2 rounded-xl mr-3">
-                <ChefHat className="w-6 h-6 text-solarized-base3" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-solarized-base02">
-                  川崎市の給食献立情報
-                </h1>
-                <p className="text-solarized-base01">
-                  {currentDate.toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    weekday: 'long',
-                  })}
-                </p>
-              </div>
-            </div>
-
             <h2 className="text-xl font-semibold text-solarized-base02 mb-4">
-              今日の川崎市学校給食献立
+              今日の川崎市小学校給食献立
             </h2>
 
             {/* 新しいMenuCardコンポーネントを使用（内部でSWRフックを呼び出し） */}
