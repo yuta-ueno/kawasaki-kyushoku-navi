@@ -220,8 +220,8 @@ function getNextCheckTime(type) {
 export function useMenuPrefetch() {
   const { mutate } = useSWRConfig()
 
-  // 月末に翌月データをプリフェッチ
-  const prefetchNextMonthIfNeeded = district => {
+  // 月末に翌月データをプリフェッチ（useCallbackでメモ化して再レンダリング防止）
+  const prefetchNextMonthIfNeeded = React.useCallback(district => {
     const now = new Date()
     const dayOfMonth = now.getDate()
 
@@ -235,13 +235,13 @@ export function useMenuPrefetch() {
       const apiUrl = `/api/menu/monthly?year=${year}&month=${month}&district=${district}`
       mutate(apiUrl, undefined, { revalidate: true }).catch(() => {})
     }
-  }
+  }, [mutate])
 
   // 手動プリフェッチ（ユーザーが明示的に要求した場合）
-  const manualPrefetch = (district, targetDate) => {
+  const manualPrefetch = React.useCallback((district, targetDate) => {
     const apiUrl = `/api/menu/today?date=${targetDate}&district=${district}`
     return mutate(apiUrl, undefined, { revalidate: true })
-  }
+  }, [mutate])
 
   return {
     prefetchNextMonthIfNeeded,
@@ -294,7 +294,7 @@ export function useKawasakiMenuApp() {
     }
   }
 
-  // 月末のプリフェッチ（アプリ起動時）
+  // 月末のプリフェッチ（アプリ起動時）- 1回だけ実行
   useEffect(() => {
     if (isLoaded && isOnline && selectedSchool) {
       const timer = setTimeout(() => {
@@ -302,7 +302,8 @@ export function useKawasakiMenuApp() {
       }, 10000) // 10秒後に実行
       return () => clearTimeout(timer)
     }
-  }, [isLoaded, isOnline, selectedSchool, prefetchNextMonthIfNeeded])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isOnline, selectedSchool]) // prefetchNextMonthIfNeeded を依存から除外
 
   return {
     selectedSchool,
