@@ -38,7 +38,8 @@ export function useSchoolSelection() {
 // 📅 今日の献立取得（月1回更新最適化版）
 export const useTodayMenu = (district = 'A', date) => {
   const targetDate = date || getTodayJST()
-  const apiUrl = `/api/menu/today?date=${targetDate}&district=${district}`
+  // dateがnullの場合はSWRを無効化（月間データ表示時の不要なリクエスト防止）
+  const apiUrl = date !== null ? `/api/menu/today?date=${targetDate}&district=${district}` : null
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
     // 🔄 給食データの実態に合わせた設定 - 静的な更新間隔に変更
