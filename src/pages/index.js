@@ -23,7 +23,7 @@ export default function HomePage() {
   // SWR統合フックを使用
   const app = useKawasakiMenuApp()
 
-  // 統計情報を計算（useMemoを条件分岐の前に配置）
+  // 統計情報を計算（再レンダリング最適化）
   const stats = React.useMemo(() => {
     const monthlyMenus = app.monthlyMenus?.menus || []
 
@@ -54,7 +54,7 @@ export default function HomePage() {
       specialMenus,
       avgCalories,
     }
-  }, [app.monthlyMenus?.menus])
+  }, [app.monthlyMenus.menus]) // .menusへの直接参照で不要な再計算を防ぐ
 
   // アプリの準備ができていない場合
   if (!app.isSchoolLoaded) {

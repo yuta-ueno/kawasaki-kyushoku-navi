@@ -41,8 +41,8 @@ export const useTodayMenu = (district = 'A', date) => {
   const apiUrl = `/api/menu/today?date=${targetDate}&district=${district}`
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
-    // 🔄 給食データの実態に合わせた設定
-    refreshInterval: 6 * 60 * 60 * 1000, // 6時間間隔（2分 → 6時間）
+    // 🔄 給食データの実態に合わせた設定 - 静的な更新間隔に変更
+    refreshInterval: 6 * 60 * 60 * 1000, // 6時間間隔で固定
 
     // 📱 ユーザー操作時は即座に更新
     revalidateOnFocus: true, // ユーザーがアプリに戻った時
@@ -56,9 +56,6 @@ export const useTodayMenu = (district = 'A', date) => {
 
     // 📊 長期キャッシュ
     dedupingInterval: 30 * 60 * 1000, // 30分間は重複リクエスト防止
-
-    // 🎯 月末・月初の更新頻度調整
-    refreshInterval: getSmartRefreshInterval('daily'),
   })
 
   return {
@@ -69,9 +66,9 @@ export const useTodayMenu = (district = 'A', date) => {
     hasData: !!data,
     isEmpty: data === null,
 
-    // 📊 追加情報
-    lastUpdated: data ? new Date() : null,
-    nextCheck: getNextCheckTime('daily'),
+    // 📊 追加情報 - 毎回新しいDateオブジェクト作成を防ぐ
+    lastUpdated: data ? data.timestamp || null : null,
+    nextCheck: null, // 固定間隔のため次回チェック時刻計算は不要
   }
 }
 
@@ -89,17 +86,17 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
   const apiUrl = `/api/menu/monthly?year=${targetYear}&month=${targetMonth}&district=${district}`
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
-    // 🔄 月間データは更新頻度を大幅削減
-    refreshInterval: getSmartRefreshInterval('monthly'),
+    // 🔄 月間データは再レンダリング防止のため更新停止
+    refreshInterval: 0, // 自動更新を完全停止
 
-    // 📱 手動更新のみ
+    // 📱 ユーザー操作時のみ更新
     revalidateOnFocus: false, // フォーカス時は更新しない
     revalidateOnReconnect: false, // 再接続時も更新しない
     revalidateIfStale: false, // 古いデータを許容
 
     // 🚨 エラー処理は最小限・長い間隔
     errorRetryCount: 1,
-    errorRetryInterval: 3 * 60 * 1000, // 3分後にリトライ
+    errorRetryInterval: 5 * 60 * 1000, // 5分後にリトライ
 
     // 📊 超長期キャッシュ
     dedupingInterval: 24 * 60 * 60 * 1000, // 24時間は重複リクエスト防止
@@ -177,9 +174,9 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
     totalMenuDays: processedData.totalMenuDays,
     specialMenuCount: processedData.specialMenuCount,
 
-    // 📊 追加情報
-    lastUpdated: data ? new Date() : null,
-    nextCheck: getNextCheckTime('monthly'),
+    // 📊 追加情報 - 毎回新しいDateオブジェクト作成を防ぐ
+    lastUpdated: data ? data.timestamp || null : null,
+    nextCheck: null, // 自動更新停止のため次回チェック時刻は不要
   }
 }
 
