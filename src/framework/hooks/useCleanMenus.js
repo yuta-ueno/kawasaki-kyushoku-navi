@@ -260,10 +260,12 @@ export function useMenuSearch() {
   };
 }
 
-export default {
+const useCleanMenus = {
   useTodayMenuClean,
   useMonthlyMenusClean,
   useMenuAppClean,
   useMenuImport,
   useMenuSearch
 };
+
+export default useCleanMenus;

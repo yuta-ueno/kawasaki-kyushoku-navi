@@ -39,7 +39,7 @@ export const getDistrictByWard = (ward) => {
   return DISTRICT_MAPPING[ward] || null;
 };
 
-export default {
+const Districts = {
   DISTRICTS,
   DISTRICT_NAMES,
   DISTRICT_CODES,
@@ -48,3 +48,5 @@ export default {
   getDistrictName,
   getDistrictByWard
 };
+
+export default Districts;

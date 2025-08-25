@@ -186,9 +186,11 @@ export const createEmptyMenu = (date, district) => {
   };
 };
 
-export default {
+const Menu = {
   MenuSchema,
   validateMenuData,
   sanitizeMenuData,
   createEmptyMenu
 };
+
+export default Menu;

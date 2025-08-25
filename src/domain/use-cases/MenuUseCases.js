@@ -235,9 +235,11 @@ export class GetMenuStatisticsUseCase {
   }
 }
 
-export default {
+const MenuUseCases = {
   GetTodayMenuUseCase,
   GetMonthlyMenusUseCase,
   ImportMenusUseCase,
   GetMenuStatisticsUseCase
 };
+
+export default MenuUseCases;

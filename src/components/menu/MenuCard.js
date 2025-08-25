@@ -30,15 +30,14 @@ const getDayColor = dayOfWeek => {
   )
 }
 
-const MenuCard = ({ debugDate, isToday = false, menuData = null, enabled = true }) => {
+const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
   const { selectedSchool } = useSchoolSelection()
   
-  // menuDataが渡されている場合またはenabledがfalseの場合はSWRフックを呼び出さない
-  const shouldFetch = !menuData && enabled
+  // menuDataが渡されている場合はSWRフックを呼び出さない
+  const shouldFetch = !menuData
   const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
     selectedSchool,
-    shouldFetch ? debugDate : null, // nullを渡すとSWRが無効化される
-    shouldFetch
+    shouldFetch ? debugDate : null // nullを渡すとSWRが無効化される
   )
 
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用

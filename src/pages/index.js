@@ -23,9 +23,8 @@ export default function HomePage() {
     displayMonth = 9
   }
 
-  // 給食情報ページでのみSWRフックを有効化
-  const isMenuPage = router.pathname === '/'
-  const app = useKawasakiMenuApp(isMenuPage)
+  // SWR統合フックを使用（給食情報専用アプリのため常時有効）
+  const app = useKawasakiMenuApp()
 
   // 統計情報を計算（再レンダリング最適化）
   const stats = React.useMemo(() => {
@@ -193,7 +192,7 @@ export default function HomePage() {
 
             {/* 新しいMenuCardコンポーネントを使用（内部でSWRフックを呼び出し） */}
             <div className="max-w-2xl">
-              <MenuCard isToday={true} enabled={isMenuPage} />
+              <MenuCard isToday={true} />
             </div>
           </section>
 

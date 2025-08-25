@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   Star,
   Info,
-  Droplets,
 } from 'lucide-react'
 
 // お知らせポップアップコンポーネント
@@ -282,18 +281,6 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                   >
                     <ChefHat className="w-4 h-4" />
                     <span>給食情報</span>
-                  </button>
-                </Link>
-                <Link href="/water-spots">
-                  <button
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      router.pathname === '/water-spots'
-                        ? 'bg-solarized-base3 text-solarized-base02 shadow-sm'
-                        : 'text-solarized-base01 hover:text-solarized-base02 hover:bg-solarized-base2'
-                    }`}
-                  >
-                    <Droplets className="w-4 h-4" />
-                    <span>給水スポット</span>
                   </button>
                 </Link>
               </div>
