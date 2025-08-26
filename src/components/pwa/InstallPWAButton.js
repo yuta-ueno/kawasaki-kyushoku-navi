@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Smartphone, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 import InstallInstructionsModal from './InstallInstructionsModal'
 
 const InstallPWAButton = () => {
@@ -7,14 +7,19 @@ const InstallPWAButton = () => {
   const [showModal, setShowModal] = useState(false)
   const [deviceType, setDeviceType] = useState('unknown')
   const [isInstallable, setIsInstallable] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+    
     const detectDevice = () => {
       const userAgent = navigator.userAgent.toLowerCase()
       const isIOS = /iphone|ipad|ipod/.test(userAgent)
       const isAndroid = /android/.test(userAgent)
       const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent)
       const isChrome = /chrome/.test(userAgent) && !/edge/.test(userAgent)
+
+      console.log('Device detection:', { userAgent, isIOS, isAndroid, isSafari, isChrome })
 
       if (isIOS) {
         setDeviceType(isSafari ? 'ios-safari' : 'ios-other')
@@ -26,12 +31,24 @@ const InstallPWAButton = () => {
     }
 
     const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt event fired', e)
       e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallable(true)
     }
 
+    // PWAの条件をチェック
+    const checkPWAInstallable = () => {
+      // Service Workerが登録されているかチェック
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          console.log('Service Worker registrations:', registrations.length)
+        })
+      }
+    }
+
     detectDevice()
+    checkPWAInstallable()
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
@@ -41,25 +58,32 @@ const InstallPWAButton = () => {
   }, [])
 
   const handleInstallClick = async () => {
+    console.log('Install button clicked, deferredPrompt:', !!deferredPrompt)
+    
     if (deferredPrompt) {
-      // Android Chrome - 直接インストールダイアログを表示
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      console.log(`PWA install prompt outcome: ${outcome}`)
-      setDeferredPrompt(null)
+      try {
+        // Android Chrome - 直接インストールダイアログを表示
+        await deferredPrompt.prompt()
+        const { outcome } = await deferredPrompt.userChoice
+        console.log(`PWA install prompt outcome: ${outcome}`)
+        setDeferredPrompt(null)
+      } catch (error) {
+        console.error('Error showing install prompt:', error)
+        setShowModal(true)
+      }
     } else {
       // iOS Safari または その他のブラウザ - 操作説明モーダルを表示
       setShowModal(true)
     }
   }
 
-  // モバイルデバイスでない場合は表示しない
-  if (!isInstallable || typeof window === 'undefined') {
+  // クライアントサイドでない場合は表示しない
+  if (!isClient || typeof window === 'undefined') {
     return null
   }
 
-  // デスクトップでは表示しない
-  if (window.innerWidth >= 768) {
+  // モバイルデバイスでない場合やインストール不可の場合は表示しない
+  if (!isInstallable || window.innerWidth >= 768) {
     return null
   }
 
@@ -67,12 +91,11 @@ const InstallPWAButton = () => {
     <>
       <button
         onClick={handleInstallClick}
-        className="flex items-center space-x-1 px-2 py-1.5 sm:px-3 sm:py-2 bg-solarized-green text-solarized-base3 rounded-lg text-xs sm:text-sm font-medium hover:bg-solarized-cyan transition-colors shadow-sm"
+        className="flex items-center space-x-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-solarized-green text-solarized-base3 rounded-lg text-xs sm:text-sm font-medium hover:bg-solarized-cyan transition-colors shadow-sm whitespace-nowrap"
         aria-label="ホーム画面に追加"
       >
-        <Smartphone className="w-3 h-3 sm:w-4 sm:h-4" />
-        <span className="hidden xs:inline">ホーム画面に追加</span>
-        <span className="xs:hidden">📱</span>
+        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-2" />
+        <span className="text-xs sm:text-sm">ホームに追加</span>
       </button>
 
       <InstallInstructionsModal
