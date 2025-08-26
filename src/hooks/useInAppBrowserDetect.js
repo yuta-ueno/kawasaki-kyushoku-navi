@@ -4,10 +4,8 @@ export default function useInAppBrowserDetect() {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
   
   return useMemo(() => {
-    // UserAgent取得不可の場合もLINEと判定（LINEアプリ内で制限されている可能性）
-    const isUAUnavailable = !ua || ua.trim() === ''
-    const isLineByUA = /Line\//.test(ua)
-    const isLine = isLineByUA || isUAUnavailable
+    // LINEアプリ内ブラウザの検知（UserAgent識別は無効化）
+    const isLine = false
     
     // プラットフォーム検知
     const isAndroid = /Android/i.test(ua)
@@ -42,31 +40,7 @@ export default function useInAppBrowserDetect() {
     const finalIsLine = isLine || hasLineInterface || debugMode
     const finalIsInApp = finalIsLine || isTwitter || isInstagram || isFacebook || debugMode
     
-    // デバッグ情報（常時表示 - LINE検知のため）
-    if (typeof window !== 'undefined') {
-      console.log('InApp Browser Detection:', {
-        ua,
-        isUAUnavailable,
-        isLineByUA,
-        isLine,
-        hasLineInterface,
-        debugMode,
-        finalIsLine,
-        finalIsInApp,
-        isAndroid,
-        isiOS,
-        isSafari,
-        isChrome,
-        navigator_exists: typeof navigator !== 'undefined',
-        navigator_userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-        patterns: {
-          'Line\/': /Line\//.test(ua),
-          'LineInterface': !!window.LineInterface,
-          'LIFF': !!window.liff,
-          'webkit.line': !!window.webkit?.messageHandlers?.line
-        }
-      })
-    }
+    // デバッグ情報は無効化
     
     return {
       isInApp: finalIsInApp,

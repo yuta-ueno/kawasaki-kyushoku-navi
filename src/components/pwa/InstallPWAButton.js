@@ -64,15 +64,7 @@ const InstallPWAButton = () => {
   }, [isInApp, isiOS, isAndroid, isChrome, isSafari, isLine]) // 依存関係を追加
 
   const handleInstallClick = async () => {
-    console.log('Install button clicked, deferredPrompt:', !!deferredPrompt, 'isLine:', isLine)
-    
-    // LINEアプリ内の場合は外部ブラウザで開く
-    if (isLine) {
-      const externalBrowserUrl = 'https://www.kawasaki-kyushoku.jp/?openExternalBrowser=1'
-      console.log('Redirecting to external browser:', externalBrowserUrl)
-      window.location.href = externalBrowserUrl
-      return
-    }
+    console.log('Install button clicked, deferredPrompt:', !!deferredPrompt)
     
     if (deferredPrompt) {
       try {
