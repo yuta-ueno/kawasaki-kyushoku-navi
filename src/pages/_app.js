@@ -3,6 +3,7 @@ import { SWRConfig } from 'swr'
 import { swrConfig } from '../lib/swr-config'
 import '../styles/globals.css'
 import { useEffect } from 'react'
+import LINEWebViewDetector from '../components/webview/LINEWebViewDetector'
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function App({ Component, pageProps }) {
   return (
     <SWRConfig value={swrConfig}>
       <div className="app-container">
+        <LINEWebViewDetector />
         <Component {...pageProps} />
       </div>
     </SWRConfig>

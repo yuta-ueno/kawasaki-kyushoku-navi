@@ -18,8 +18,20 @@ const InstallPWAButton = () => {
       const isAndroid = /android/.test(userAgent)
       const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent)
       const isChrome = /chrome/.test(userAgent) && !/edge/.test(userAgent)
+      
+      // LINEアプリ内WebViewかチェック
+      const isLINEWebView = userAgent.includes('line') || 
+                           userAgent.includes('linewebview') ||
+                           userAgent.includes('lineinapp') ||
+                           (userAgent.includes('line') && userAgent.includes('webkit'))
 
-      console.log('Device detection:', { userAgent, isIOS, isAndroid, isSafari, isChrome })
+      console.log('Device detection:', { userAgent, isIOS, isAndroid, isSafari, isChrome, isLINEWebView })
+
+      // LINE WebView内ではPWAインストールボタンを表示しない
+      if (isLINEWebView) {
+        setIsInstallable(false)
+        return
+      }
 
       if (isIOS) {
         setDeviceType(isSafari ? 'ios-safari' : 'ios-other')
