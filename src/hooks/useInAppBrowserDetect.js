@@ -4,8 +4,10 @@ export default function useInAppBrowserDetect() {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
   
   return useMemo(() => {
-    // LINEアプリ内ブラウザの検知（精度の高いパターン）
-    const isLine = /Line\//.test(ua)
+    // UserAgent取得不可の場合もLINEと判定（LINEアプリ内で制限されている可能性）
+    const isUAUnavailable = !ua || ua.trim() === ''
+    const isLineByUA = /Line\//.test(ua)
+    const isLine = isLineByUA || isUAUnavailable
     
     // プラットフォーム検知
     const isAndroid = /Android/i.test(ua)
@@ -44,6 +46,8 @@ export default function useInAppBrowserDetect() {
     if (typeof window !== 'undefined') {
       console.log('InApp Browser Detection:', {
         ua,
+        isUAUnavailable,
+        isLineByUA,
         isLine,
         hasLineInterface,
         debugMode,

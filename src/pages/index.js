@@ -315,6 +315,9 @@ export default function HomePage() {
                           <span className={browserInfo.isLine ? 'text-green-600 font-bold' : 'text-gray-500'}>
                             {browserInfo.isLine ? '✅ 検知' : '❌ 非検知'}
                           </span>
+                          {(!browserInfo.ua || browserInfo.ua.trim() === '') && (
+                            <span className="ml-1 text-orange-600 text-xs">(UA取得不可→LINE判定)</span>
+                          )}
                         </p>
                         <p className="mb-1">
                           <span className="font-medium">アプリ内: </span>
