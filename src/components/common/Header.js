@@ -11,6 +11,7 @@ import {
   Star,
   Info,
 } from 'lucide-react'
+import InstallPWAButton from '../pwa/InstallPWAButton'
 
 // お知らせポップアップコンポーネント
 const NotificationPopup = ({ isOpen, onClose }) => {
@@ -260,7 +261,7 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
               {router.pathname === '/' &&
                 selectedDistrict &&
                 setSelectedDistrict && (
-                  <div className="flex items-center space-x-3 sm:space-x-4">
+                  <div className="flex items-center justify-between w-full sm:justify-start space-x-3 sm:space-x-4">
                     {/* 地区選択セレクトボックス */}
                     <div className="relative">
                       <select
@@ -278,6 +279,11 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                       <div className="absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 pointer-events-none">
                         <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-solarized-base0" />
                       </div>
+                    </div>
+
+                    {/* PWAインストールボタン（モバイルのみ） */}
+                    <div className="block sm:hidden">
+                      <InstallPWAButton />
                     </div>
 
                     {/* 選択中の地区詳細情報 */}
