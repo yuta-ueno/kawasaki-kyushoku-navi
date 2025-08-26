@@ -101,7 +101,7 @@ const InstallPWAButton = () => {
         aria-label="ホーム画面に追加"
       >
         <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-2" />
-        <span className="text-xs sm:text-sm">ホームに追加</span>
+        <span className="text-xs sm:text-sm">ホーム追加</span>
       </button>
 
       <InstallInstructionsModal
