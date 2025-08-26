@@ -5,7 +5,7 @@ export default function useInAppBrowserDetect() {
   
   return useMemo(() => {
     // LINEアプリ内ブラウザの検知（精度の高いパターン）
-    const isLine = /Line\//i.test(ua)
+    const isLine = /Line\//.test(ua)
     
     // プラットフォーム検知
     const isAndroid = /Android/i.test(ua)
@@ -54,7 +54,7 @@ export default function useInAppBrowserDetect() {
         isSafari,
         isChrome,
         patterns: {
-          'Line\/': /Line\//i.test(ua),
+          'Line\/': /Line\//.test(ua),
           'LineInterface': !!window.LineInterface,
           'LIFF': !!window.liff,
           'webkit.line': !!window.webkit?.messageHandlers?.line
