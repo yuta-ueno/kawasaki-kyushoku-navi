@@ -40,8 +40,8 @@ export default function useInAppBrowserDetect() {
     const finalIsLine = isLine || hasLineInterface || debugMode
     const finalIsInApp = finalIsLine || isTwitter || isInstagram || isFacebook || debugMode
     
-    // デバッグ情報（開発時のみ）
-    if (typeof window !== 'undefined' && (finalIsLine || debugMode)) {
+    // デバッグ情報（常時表示 - LINE検知のため）
+    if (typeof window !== 'undefined') {
       console.log('InApp Browser Detection:', {
         ua,
         isLine,
@@ -53,6 +53,8 @@ export default function useInAppBrowserDetect() {
         isiOS,
         isSafari,
         isChrome,
+        navigator_exists: typeof navigator !== 'undefined',
+        navigator_userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
         patterns: {
           'Line\/': /Line\//.test(ua),
           'LineInterface': !!window.LineInterface,

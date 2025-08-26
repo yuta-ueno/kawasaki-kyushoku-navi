@@ -324,7 +324,11 @@ export default function HomePage() {
                         </p>
                         <p className="mb-1">
                           <span className="font-medium">デバイス: </span>
-                          <span className="font-medium">{browserInfo.deviceType}</span>
+                          <span className="font-medium">{browserInfo.deviceType || 'unknown'}</span>
+                        </p>
+                        <p className="mb-1">
+                          <span className="font-medium">クライアント: </span>
+                          <span className="font-medium">{isClient ? '✅ 読み込み済み' : '❌ 読み込み中'}</span>
                         </p>
                       </div>
                       <div>
@@ -346,12 +350,24 @@ export default function HomePage() {
                             {browserInfo.debugMode ? '🐛 ON' : 'OFF'}
                           </span>
                         </p>
+                        <p className="mb-1">
+                          <span className="font-medium">Navigator: </span>
+                          <span className="font-medium">
+                            {typeof navigator !== 'undefined' ? '✅ 利用可能' : '❌ 未定義'}
+                          </span>
+                        </p>
                       </div>
                     </div>
                     <div className="mt-3 p-2 bg-gray-50 rounded text-xs">
                       <p className="font-medium mb-1">UserAgent:</p>
                       <p className="break-all text-gray-600 leading-relaxed">
-                        {browserInfo.ua || 'N/A'}
+                        {browserInfo.ua || (typeof navigator !== 'undefined' ? navigator.userAgent || 'N/A' : 'Navigator未定義')}
+                      </p>
+                    </div>
+                    <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                      <p className="font-medium mb-1">直接取得UserAgent:</p>
+                      <p className="break-all text-blue-600 leading-relaxed">
+                        {typeof window !== 'undefined' && typeof navigator !== 'undefined' ? navigator.userAgent : 'Window/Navigator未定義'}
                       </p>
                     </div>
                   </div>
