@@ -1,59 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import InstallInstructionsModal from './InstallInstructionsModal'
+import useInAppBrowserDetect from '../../hooks/useInAppBrowserDetect'
 
 const InstallPWAButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [deviceType, setDeviceType] = useState('unknown')
   const [isInstallable, setIsInstallable] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  
+  const { isInApp, isLine, isiOS, isAndroid, isSafari, isChrome } = useInAppBrowserDetect()
 
   useEffect(() => {
     setIsClient(true)
     
     const detectDevice = () => {
-      const userAgent = navigator.userAgent.toLowerCase()
-      const isIOS = /iphone|ipad|ipod/.test(userAgent)
-      const isAndroid = /android/.test(userAgent)
-      const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent)
-      const isChrome = /chrome/.test(userAgent) && !/edge/.test(userAgent)
-      
-      // LINEアプリ内WebViewかチェック（より詳細な判定）
-      const linePatterns = [
-        /line/i,
-        /linewebview/i,
-        /lineinapp/i,
-        /line.*webkit/i,
-        /line.*mobile/i,
-        /line.*version/i,
-        /line.*chrome/i,
-        /line.*safari/i,
-        /jp\.naver\.line/i
-      ]
-      
-      const isLINEWebView = linePatterns.some(pattern => pattern.test(userAgent)) ||
-                           userAgent.includes('line') || 
-                           userAgent.includes('naver') ||
-                           (typeof window !== 'undefined' && (
-                             window.LineInterface || 
-                             window.liff ||
-                             window.webkit?.messageHandlers?.line
-                           ))
+      console.log('PWA Button - Device detection:', { 
+        isInApp, 
+        isLine, 
+        isiOS, 
+        isAndroid, 
+        isSafari, 
+        isChrome 
+      })
 
-      console.log('Device detection:', { userAgent, isIOS, isAndroid, isSafari, isChrome, isLINEWebView })
-
-      // LINE WebView内ではPWAインストールボタンを表示しない
-      if (isLINEWebView) {
+      // アプリ内ブラウザ（LINE等）ではPWAインストールボタンを表示しない
+      if (isInApp) {
         setIsInstallable(false)
         return
       }
 
-      if (isIOS) {
-        setDeviceType(isSafari ? 'ios-safari' : 'ios-other')
-        setIsInstallable(true)
-      } else if (isAndroid) {
-        setDeviceType(isChrome ? 'android-chrome' : 'android-other')
+      // PWA対応プラットフォームでのみ表示
+      if (isiOS || isAndroid) {
         setIsInstallable(true)
       }
     }
@@ -83,7 +61,7 @@ const InstallPWAButton = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [])
+  }, [isInApp, isiOS, isAndroid, isChrome, isSafari, isLine]) // 依存関係を追加
 
   const handleInstallClick = async () => {
     console.log('Install button clicked, deferredPrompt:', !!deferredPrompt)
@@ -129,7 +107,8 @@ const InstallPWAButton = () => {
       <InstallInstructionsModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        deviceType={deviceType}
+        deviceType={isiOS ? (isSafari ? 'ios-safari' : 'ios-other') : 
+                   isAndroid ? (isChrome ? 'android-chrome' : 'android-other') : 'unknown'}
       />
     </>
   )

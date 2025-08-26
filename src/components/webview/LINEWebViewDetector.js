@@ -1,85 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { ExternalLink, Smartphone, AlertCircle } from 'lucide-react'
 import OpenInBrowserModal from './OpenInBrowserModal'
+import useInAppBrowserDetect from '../../hooks/useInAppBrowserDetect'
 
 const LINEWebViewDetector = () => {
-  const [isLINEWebView, setIsLINEWebView] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [deviceType, setDeviceType] = useState('unknown')
-  const [isClient, setIsClient] = useState(false)
-  const [debugMode, setDebugMode] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-    
-    // デバッグモード（URL パラメータで ?debug=line があれば強制表示）
-    const urlParams = new URLSearchParams(window.location.search)
-    const isDebug = urlParams.get('debug') === 'line'
-    setDebugMode(isDebug)
-    
-    const detectLINEWebView = () => {
-      const userAgent = navigator.userAgent
-      const userAgentLower = userAgent.toLowerCase()
-      const isIOS = /iphone|ipad|ipod/i.test(userAgent)
-      const isAndroid = /android/i.test(userAgent)
-      
-      // LINEアプリ内WebViewの詳細な判定パターン
-      const linePatterns = [
-        // 一般的なLINEパターン
-        /line/i,
-        /linewebview/i,
-        /lineinapp/i,
-        // iOS LINE固有パターン
-        /line.*webkit/i,
-        /line.*mobile/i,
-        // Android LINE固有パターン
-        /line.*version/i,
-        /line.*chrome/i,
-        // その他のLINE関連パターン
-        /line.*safari/i,
-        // LINEの特殊なUserAgent文字列
-        /jp\.naver\.line/i
-      ]
-
-      const isLINE = linePatterns.some(pattern => pattern.test(userAgent)) ||
-                    // 追加のLINE検知ロジック
-                    (userAgentLower.includes('line') || 
-                     userAgentLower.includes('naver') ||
-                     // window.LineInterfaceオブジェクトの存在確認
-                     (typeof window !== 'undefined' && (
-                       window.LineInterface || 
-                       window.liff ||
-                       window.webkit?.messageHandlers?.line
-                     )))
-
-      // デバッグ用のより詳細なログ
-      console.log('LINE WebView detection:', {
-        userAgent,
-        userAgentLower,
-        isLINE,
-        isIOS,
-        isAndroid,
-        hasLineInterface: typeof window !== 'undefined' && !!window.LineInterface,
-        hasLIFF: typeof window !== 'undefined' && !!window.liff,
-        hasWebkitLine: typeof window !== 'undefined' && !!window.webkit?.messageHandlers?.line,
-        patternMatches: linePatterns.map(pattern => ({ 
-          pattern: pattern.toString(), 
-          matches: pattern.test(userAgent) 
-        }))
-      })
-
-      if (isLINE || isDebug) {
-        setIsLINEWebView(true)
-        if (isIOS) {
-          setDeviceType('ios')
-        } else if (isAndroid) {
-          setDeviceType('android')
-        }
-      }
-    }
-
-    detectLINEWebView()
-  }, [])
+  const { isInApp, isLine, deviceType, debugMode } = useInAppBrowserDetect()
 
   const handleOpenInBrowser = () => {
     const currentUrl = window.location.href
@@ -106,13 +32,8 @@ const LINEWebViewDetector = () => {
     }
   }
 
-  // クライアントサイドでない場合は表示しない
-  if (!isClient) {
-    return null
-  }
-
   // LINEアプリ内WebViewでない場合は表示しない（デバッグモード除く）
-  if (!isLINEWebView && !debugMode) {
+  if (!isLine && !debugMode) {
     return null
   }
 
