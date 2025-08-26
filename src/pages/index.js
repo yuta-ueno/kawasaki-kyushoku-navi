@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Calendar, ChefHat, MapPin } from 'lucide-react'
 import { useKawasakiMenuApp } from '../hooks/useKawasakiMenu'
+import useInAppBrowserDetect from '../hooks/useInAppBrowserDetect'
 import MenuCard from '../components/menu/MenuCard'
 import Loading from '../components/common/Loading'
 import Header from '../components/common/Header'
@@ -25,6 +26,9 @@ export default function HomePage() {
 
   // SWR統合フックを使用（給食情報専用アプリのため常時有効）
   const app = useKawasakiMenuApp()
+  
+  // ブラウザ検知情報を取得
+  const browserInfo = useInAppBrowserDetect()
 
   // 統計情報を計算（再レンダリング最適化）
   const stats = React.useMemo(() => {
@@ -291,6 +295,59 @@ export default function HomePage() {
                     かわさき給食ナビ開発チーム | 最終更新: 2025年8月22日 |
                     お問い合わせ: contact@kawasaki-kyushoku.jp
                   </p>
+                </div>
+                
+                {/* UserAgent情報（デバッグ用） */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-solarized-base02 mb-2">
+                    ブラウザ検知情報（デバッグ用）
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4 text-xs text-solarized-base01">
+                    <div>
+                      <p className="mb-1">
+                        <span className="font-medium">LINE: </span>
+                        <span className={browserInfo.isLine ? 'text-green-600 font-bold' : 'text-gray-500'}>
+                          {browserInfo.isLine ? '✅ 検知' : '❌ 非検知'}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        <span className="font-medium">アプリ内: </span>
+                        <span className={browserInfo.isInApp ? 'text-orange-600 font-bold' : 'text-gray-500'}>
+                          {browserInfo.isInApp ? '✅ アプリ内' : '❌ 通常'}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        <span className="font-medium">デバイス: </span>
+                        <span className="font-medium">{browserInfo.deviceType}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mb-1">
+                        <span className="font-medium">Safari: </span>
+                        <span className={browserInfo.isSafari ? 'text-blue-600' : 'text-gray-500'}>
+                          {browserInfo.isSafari ? '✅' : '❌'}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        <span className="font-medium">Chrome: </span>
+                        <span className={browserInfo.isChrome ? 'text-green-600' : 'text-gray-500'}>
+                          {browserInfo.isChrome ? '✅' : '❌'}
+                        </span>
+                      </p>
+                      <p className="mb-1">
+                        <span className="font-medium">デバッグ: </span>
+                        <span className={browserInfo.debugMode ? 'text-purple-600 font-bold' : 'text-gray-500'}>
+                          {browserInfo.debugMode ? '🐛 ON' : 'OFF'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 p-2 bg-gray-50 rounded text-xs">
+                    <p className="font-medium mb-1">UserAgent:</p>
+                    <p className="break-all text-gray-600 leading-relaxed">
+                      {browserInfo.ua || 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
