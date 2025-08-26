@@ -12,6 +12,7 @@ import {
   Info,
 } from 'lucide-react'
 import InstallPWAButton from '../pwa/InstallPWAButton'
+import ShareButton from '../share/ShareButton'
 
 // お知らせポップアップコンポーネント
 const NotificationPopup = ({ isOpen, onClose }) => {
@@ -281,8 +282,15 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
                       </div>
                     </div>
 
-                    {/* PWAインストールボタン（モバイルのみ） */}
-                    <div className="block sm:hidden">
+                    {/* 共有・PWAボタン（モバイル） */}
+                    <div className="flex items-center space-x-2 sm:hidden">
+                      <ShareButton />
+                      <InstallPWAButton />
+                    </div>
+
+                    {/* 共有・PWAボタン（デスクトップ） */}
+                    <div className="hidden sm:flex items-center space-x-2">
+                      <ShareButton />
                       <InstallPWAButton />
                     </div>
 
