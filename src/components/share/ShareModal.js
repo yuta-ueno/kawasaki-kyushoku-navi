@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Share, Copy, Smartphone, Monitor, Check } from 'lucide-react'
+import { X, Share, Copy, Smartphone, Check } from 'lucide-react'
 
 const ShareModal = ({ isOpen, onClose }) => {
   const [copiedType, setCopiedType] = useState(null)
@@ -26,7 +26,6 @@ const ShareModal = ({ isOpen, onClose }) => {
   }
 
   const lineUrl = 'https://link.kawasaki-kyushoku.jp'
-  const pcUrl = 'https://kawasaki-kyushoku.jp'
 
   return (
     <>
@@ -58,20 +57,6 @@ const ShareModal = ({ isOpen, onClose }) => {
         {/* コンテンツエリア */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
-            <div className="bg-solarized-base3 rounded-lg p-4 border-l-4 border-solarized-blue">
-              <div className="flex items-start space-x-2">
-                <Share className="w-5 h-5 text-solarized-blue mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-solarized-base02 font-medium text-sm mb-1">
-                    URLを共有しよう
-                  </p>
-                  <p className="text-solarized-base01 text-sm">
-                    LINE用とパソコン用、それぞれに最適化されたURLをご用意しています。
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* LINE用URL */}
             <div className="bg-green-50 rounded-lg p-6 border border-green-200">
               <div className="flex items-center justify-between mb-4">
@@ -80,8 +65,8 @@ const ShareModal = ({ isOpen, onClose }) => {
                     <Smartphone className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-green-800 text-lg">LINE用URL</h3>
-                    <p className="text-green-600 text-sm">スマートフォンやLINEでの共有に最適</p>
+                    <h3 className="font-bold text-green-800 text-lg">共有URL</h3>
+                    <p className="text-green-600 text-sm">URLをクリップボードにコピー</p>
                   </div>
                 </div>
               </div>
@@ -105,58 +90,10 @@ const ShareModal = ({ isOpen, onClose }) => {
                 ) : (
                   <>
                     <Copy className="w-4 h-4" />
-                    <span>LINE用URLをコピー</span>
+                    <span>URLをコピー</span>
                   </>
                 )}
               </button>
-            </div>
-
-            {/* パソコン用URL */}
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <Monitor className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-blue-800 text-lg">パソコン用URL</h3>
-                    <p className="text-blue-600 text-sm">デスクトップブラウザでの利用に最適</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-4 border border-blue-200 mb-4">
-                <p className="text-sm text-gray-600 mb-2">URL:</p>
-                <p className="font-mono text-blue-700 break-all text-sm bg-blue-50 p-2 rounded">
-                  {pcUrl}
-                </p>
-              </div>
-
-              <button
-                onClick={() => copyToClipboard(pcUrl, 'pc')}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                {copiedType === 'pc' ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>コピーしました！</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>パソコン用URLをコピー</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="bg-gradient-to-r from-solarized-blue to-solarized-green p-4 rounded-lg text-white">
-              <h3 className="font-bold mb-2">📱 共有のコツ</h3>
-              <ul className="text-sm space-y-1 opacity-90">
-                <li>• LINE用URLはスマートフォンに最適化されています</li>
-                <li>• パソコン用URLはデスクトップブラウザ向けです</li>
-                <li>• コピーしたURLを相手に送信してご利用ください</li>
-              </ul>
             </div>
           </div>
         </div>
