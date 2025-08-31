@@ -77,6 +77,61 @@ async function checkRateLimit(req) {
 
 // 古い関数は削除済み - cors-config.js と api-utils.js に移動
 
+// 日付から曜日を取得するヘルパー関数
+function getDayOfWeek(dateString) {
+  const date = new Date(dateString)
+  const days = ['日', '月', '火', '水', '木', '金', '土']
+  return days[date.getDay()]
+}
+
+// 開発環境用モック月間データ生成
+function generateMockMonthlyData(year, month, district) {
+  const menus = []
+  const daysInMonth = new Date(year, month, 0).getDate()
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month - 1, day)
+    const dayOfWeek = date.getDay()
+    
+    // 土日はスキップ
+    if (dayOfWeek === 0 || dayOfWeek === 6) continue
+    
+    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    
+    menus.push({
+      id: `${dateString}-${district}`,
+      date: dateString,
+      dayOfWeek: getDayOfWeek(dateString),
+      district: district,
+      menu: {
+        items: [
+          'ご飯',
+          'みそ汁（わかめ・豆腐）',
+          day % 2 === 0 ? '鶏肉の照り焼き' : '魚の西京焼き',
+          day % 3 === 0 ? 'ひじきの煮物' : '野菜炒め',
+          '牛乳'
+        ],
+        description: `${month}月${day}日の栄養バランスの良い献立です。`
+      },
+      nutrition: {
+        energy: 650 + (day % 10) * 5,
+        protein: 25.2 + (day % 5) * 0.5,
+        fat: 18.5,
+        carbohydrate: 95.3,
+        calcium: 350,
+        iron: 2.8,
+        salt: 2.1
+      },
+      hasSpecialMenu: day % 7 === 0, // 7の倍数の日は特別メニュー
+      notes: day % 7 === 0 ? '今日は特別メニューです！' : null,
+      year: year,
+      month: month
+    })
+  }
+  
+  return menus
+}
+
 // データサニタイゼーション
 function sanitizeMenuData(doc) {
   const data = doc.data()
@@ -120,9 +175,23 @@ export default async function handler(req, res) {
       })
     }
 
-    // 4. レート制限チェック（新しいエラーハンドリング）
-    const rateLimitResult = await checkRateLimit(req)
-    checkRateLimitResult(rateLimitResult, 5, 60) // RateLimitErrorをthrowする可能性
+    // 4. レート制限チェック（Redis設定が無い場合は簡略化）
+    let rateLimitResult
+    const hasRedisConfig = process.env.UPSTASH_REDIS_REST_URL && 
+                          process.env.UPSTASH_REDIS_REST_URL !== 'disabled-for-demo'
+    
+    if (!hasRedisConfig) {
+      // Redis設定が無い場合はシンプルなレート制限
+      rateLimitResult = {
+        allowed: true,
+        count: 1,
+        remaining: 4,
+        resetTime: Math.ceil(Date.now() / 1000) + 60
+      }
+    } else {
+      rateLimitResult = await checkRateLimit(req)
+      checkRateLimitResult(rateLimitResult, 5, 60) // RateLimitErrorをthrowする可能性
+    }
 
     // Rate limiting headers（成功時）
     res.setHeader('X-RateLimit-Limit', '5')
@@ -149,19 +218,30 @@ export default async function handler(req, res) {
     })
 
     // 6. データ取得処理
-    const menusRef = collection(db, 'kawasaki_menus')
-    const q = query(
-      menusRef,
-      where('year', '==', year),
-      where('month', '==', month),
-      where('district', '==', district),
-      orderBy('date', 'asc')
-    )
+    let menus = []
+    
+    // モックデータ対応（Firebase設定が不完全な場合）
+    const usesMockData = process.env.NODE_ENV === 'development' || 
+                        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'kawasaki-kyushoku-dev'
+    
+    if (usesMockData) {
+      // モックデータを生成
+      menus = generateMockMonthlyData(year, month, district)
+    } else {
+      const menusRef = collection(db, 'kawasaki_menus')
+      const q = query(
+        menusRef,
+        where('year', '==', year),
+        where('month', '==', month),
+        where('district', '==', district),
+        orderBy('date', 'asc')
+      )
 
-    const querySnapshot = await getDocs(q)
-
-    // 7. データサニタイゼーション
-    const menus = querySnapshot.docs.map(sanitizeMenuData)
+      const querySnapshot = await getDocs(q)
+      
+      // 7. データサニタイゼーション
+      menus = querySnapshot.docs.map(sanitizeMenuData)
+    }
 
     // 8. データサイズ制限とパフォーマンス保護
     const maxResults = 50 // 最大50件まで

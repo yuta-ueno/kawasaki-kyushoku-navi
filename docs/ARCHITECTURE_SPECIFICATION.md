@@ -1,437 +1,540 @@
 # 川崎給食ナビ - アーキテクチャ仕様書
 
-## 📋 プロジェクト概要
+**最終更新:** 2025年8月27日  
+**バージョン:** 2.1.0  
+**文書種別:** 技術アーキテクチャ仕様書
 
-**プロジェクト名**: 川崎給食ナビ  
-**バージョン**: 2.1.0 (Security & Performance Enhanced)  
-**最終更新**: 2025年8月25日  
-**開発者**: かわさき給食ナビ開発チーム
+---
+
+## 目次
+
+1. [システム概要](#システム概要)
+2. [アプリケーションアーキテクチャ](#アプリケーションアーキテクチャ)
+3. [データアーキテクチャ](#データアーキテクチャ)
+4. [コンポーネントアーキテクチャ](#コンポーネントアーキテクチャ)
+5. [APIレイヤーアーキテクチャ](#apiレイヤーアーキテクチャ)
+6. [セキュリティアーキテクチャ](#セキュリティアーキテクチャ)
+7. [インフラストラクチャアーキテクチャ](#インフラストラクチャアーキテクチャ)
+8. [パフォーマンス最適化](#パフォーマンス最適化)
+9. [ドメイン駆動設計(DDD)実装](#ドメイン駆動設計ddd実装)
+10. [開発・デプロイメント](#開発デプロイメント)
+11. [監視・可観測性](#監視可観測性)
+12. [将来の検討事項](#将来の検討事項)
+
+---
+
+## システム概要
 
 ### 目的
-川崎市立小中学校の給食献立情報を提供するWebアプリケーション
+川崎給食ナビは、川崎市立小中学校の給食メニュー情報を提供するNext.jsウェブアプリケーションです。保護者や生徒に対して、日々のメニュー、栄養情報、および3つの地区ゾーンの月間カレンダービューを提供します。
 
-### 主要機能
-1. **給食メニュー機能** - 今日・月間の給食献立表示、栄養情報提供
-2. **管理機能** - データインポート、統計情報表示
-3. **モバイル対応** - レスポンシブデザイン、PWA対応
-4. **セキュリティ** - 包括的なセキュリティ対策とパフォーマンス最適化
+### 中核要件
+- 地区別（A/B/C ゾーン）の今日の給食メニュー表示
+- 月間メニューカレンダービューの提供
+- 栄養情報（カロリー、タンパク質）の表示
+- キャッシュによるオフライン機能のサポート
+- モバイルファーストレスポンシブデザイン
+- アプリライクな体験のためのPWA機能
+- Firebaseとのリアルタイムデータ同期
 
-### 廃止機能
-- **給水スポット機能** - 独立したアプリケーションとして分離予定（仕様書は別途保管）
-
----
-
-## 🏗️ アーキテクチャ概要
-
-### クリーンアーキテクチャの採用
-
-このプロジェクトは**クリーンアーキテクチャ**を採用し、以下の4層構造で設計されています：
-
-```
-┌─────────────────────────────────────┐
-│          Framework Layer            │  ← UI、Next.js Pages、React Hooks
-├─────────────────────────────────────┤
-│          Interface Layer            │  ← Controllers、DTOs、Presenters
-├─────────────────────────────────────┤
-│        Infrastructure Layer         │  ← External APIs、Database、Cache
-├─────────────────────────────────────┤
-│           Domain Layer              │  ← Entities、Use Cases、Repositories
-└─────────────────────────────────────┘
-```
-
-### 依存関係の方向
-- **外側の層は内側の層に依存**
-- **内側の層は外側の層に依存しない**
-- **Dependency Inversion Principle** の徹底
+### 主要ステークホルダー
+- **主要ユーザー:** 川崎市の生徒の保護者・保護者
+- **二次ユーザー:** 生徒、学校管理者
+- **データプロバイダー:** 川崎市教育委員会
+- **技術メンテナー:** 開発チーム
 
 ---
 
-## 📁 ディレクトリ構造
+## アプリケーションアーキテクチャ
+
+### フレームワーク・技術スタック
+
+#### フロントエンドスタック
+- **フレームワーク:** Next.js 14.2.32 (Pages Router)
+- **ランタイム:** React 18 with Strict Mode
+- **言語:** JavaScript (ES2022+) with 一部TypeScriptコンポーネント
+- **スタイリング:** Tailwind CSS with カスタムSolarizedカラーパレット
+- **状態管理:** データフェッチング用SWR + 設定用localStorage
+- **UIコンポーネント:** Lucide React アイコン付きカスタムコンポーネント
+- **ビルドツール:** Next.js組み込みwebpack設定
+
+#### バックエンドスタック
+- **APIレイヤー:** Next.js API Routes (サーバーレス関数)
+- **データベース:** Google Cloud Firestore (NoSQLドキュメントデータベース)
+- **認証:** Firebase Admin SDK (書き込み操作のみ)
+- **キャッシュ:** レート制限とAPIキャッシュ用Upstash Redis
+- **バリデーション:** Zod スキーマバリデーションライブラリ
+- **エラー監視:** エラー追跡とパフォーマンス監視用Sentry
+
+#### インフラストラクチャ
+- **ホスティング:** Vercel (主要デプロイメントプラットフォーム)
+- **CDN:** Vercel Edge Network
+- **データベース:** Google Cloud Firestore
+- **キャッシュ:** Upstash Redis
+- **監視:** Sentry + Vercel Analytics
+- **ドメイン:** SSL/TLS付きカスタムドメイン
+
+### アーキテクチャパターン
+
+#### クリーンアーキテクチャ（ヘキサゴナル）
+アプリケーションは関心の分離を明確にしたクリーンアーキテクチャ原則に従います：
 
 ```
 src/
-├── domain/                     # Domain Layer (ビジネスロジック)
-│   ├── entities/              # エンティティ
-│   │   └── Menu.js           # 給食メニューエンティティ
-│   ├── use-cases/            # ユースケース
-│   │   └── MenuUseCases.js   # メニュー関連ビジネスロジック
-│   └── repositories/         # リポジトリインターfaces
-│       └── MenuRepository.js
-│
-├── infrastructure/            # Infrastructure Layer (外部接続)
-│   ├── repositories/         # リポジトリ実装
-│   │   └── FirebaseMenuRepository.js
-│   ├── external/            # 外部サービス接続
-│   │   └── Firebase.js
-│   └── cache/               # キャッシュサービス
-│       └── InMemoryCache.js
-│
-├── interface/                # Interface Layer (API境界)
-│   ├── controllers/         # APIコントローラー
-│   │   └── MenuController.js
-│   ├── presenters/         # データプレゼンター
-│   └── dto/                # データ転送オブジェクト
-│
-├── framework/               # Framework Layer (UI・技術詳細)
-│   ├── ui/                 # UIコンポーネント
-│   ├── pages/              # Next.js ページ
-│   └── hooks/              # React Hooks
-│       └── useCleanMenus.js # クリーンアーキテクチャ対応フック
-│
-├── shared/                  # 共有層
-│   ├── constants/          # 定数定義
-│   │   └── Districts.js    # 地区関連定数
-│   ├── types/              # 型定義
-│   │   └── Menu.js         # メニュー型定義
-│   ├── utils/              # ユーティリティ
-│   └── config/             # 設定ファイル
-│
-├── components/              # 既存UIコンポーネント (段階的移行)
-├── hooks/                   # 既存フック (段階的移行)
-├── lib/                     # 既存ライブラリ (段階的移行)
-├── pages/                   # Next.js Pages Router
-│   ├── api/                # 既存API (v1)
-│   │   └── menu/
-│   └── api/v2/             # 新API (Clean Architecture)
-│       └── menu/
-└── styles/                  # スタイルファイル
+├── domain/              # コアビジネスロジック (エンティティ、ユースケース)
+├── infrastructure/      # 外部関心事 (データベース、キャッシュ)
+├── interface/          # コントローラーとDTO
+├── components/         # UIレイヤー (Reactコンポーネント)
+├── pages/             # Next.jsルーティングとページコンポーネント
+└── lib/               # 共有ユーティリティと設定
 ```
 
----
-
-## 🔧 技術スタック
-
-### コア技術
-- **Next.js 14.2.32** (Pages Router) - セキュリティアップデート適用
-- **React 18** (UI Framework)
-- **Firebase Firestore** (Database)
-- **Upstash Redis** (Rate Limiting & Cache)
-
-### データフェッチング
-- **SWR 2.3.6** (Client-side Data Fetching)
-- **Custom Hooks** (State Management)
-
-### スタイリング
-- **Tailwind CSS 3.4** (Utility-first CSS)
-- **Solarized Color Scheme** (統一テーマ)
-
-
-### 開発・品質管理
-- **ESLint** (Code Linting)
-- **Prettier** (Code Formatting)
-- **Sentry** (Error Monitoring)
+#### ドメイン駆動設計（DDD）
+- **エンティティ:** ビジネスルールとバリデーション付き`Menu`エンティティ
+- **リポジトリ:** Firebase実装付き抽象リポジトリパターン
+- **ユースケース:** メニュー関連ビジネス操作
+- **値オブジェクト:** 日付範囲、栄養値、地区識別子
 
 ---
 
-## 🎯 主要機能仕様
+## データアーキテクチャ
 
-### 1. 給食メニュー機能
+### データベース設計（Firestore）
 
-#### 1.1 今日の給食表示
-- **エンドポイント**: `/api/menu/today`, `/api/v2/menu/today`
-- **パラメータ**: `date` (YYYY-MM-DD), `district` (A/B/C)
-- **機能**: 指定日・地区の給食メニューと栄養情報を表示
-- **セキュリティ**: レート制限(10req/min)、CORS検証、入力値検証
+#### コレクション構造
+```
+kawasaki_menus/
+├── {YYYY-MM-DD-A}/    # ドキュメントIDパターン
+│   ├── date: string   # ISO日付 (YYYY-MM-DD)
+│   ├── district: string # A, B, または C
+│   ├── dayOfWeek: string # 月, 火, 水, など
+│   ├── menu: object
+│   │   ├── items: string[]    # メニュー項目リスト
+│   │   └── description: string # オプション説明
+│   ├── nutrition: object
+│   │   ├── energy: number     # カロリー (kcal)
+│   │   └── protein: number    # タンパク質 (g)
+│   ├── hasSpecialMenu: boolean
+│   └── notes: string          # 学習ポイント
+```
 
-#### 1.2 月間給食カレンダー
-- **エンドポイント**: `/api/menu/monthly`
-- **パラメータ**: `year`, `month`, `district`
-- **機能**: 月間給食カレンダー、統計情報表示
-- **セキュリティ**: レート制限(5req/min)、大量データ制限(最大50件)
+#### 地区ゾーン
+- **地区A:** 川崎区・中原区 (Kawasaki-ku, Nakahara-ku)
+- **地区B:** 幸区・多摩区・麻生区 (Saiwai-ku, Tama-ku, Asao-ku)  
+- **地区C:** 高津区・宮前区 (Takatsu-ku, Miyamae-ku)
 
-#### 1.3 データインポート（管理者用）
-- **エンドポイント**: `/api/v2/menu/import`
-- **機能**: JSON形式での一括メニューデータインポート
-- **セキュリティ**: 認証必須、CSRFトークン検証
+#### データアクセスパターン
+- **今日のメニュー:** `{date}-{district}`による単一ドキュメント検索
+- **月間ビュー:** 地区と日付でフィルタリングした範囲クエリ
+- **統計クエリ:** 月間データからクライアント側で計算した集計
 
-### 2. 共通機能
-
-#### 2.1 地区管理
-- **地区**: A(川崎区・中原区), B(幸区・多摩区・麻生区), C(高津区・宮前区)
-- **永続化**: LocalStorage
-- **切り替え**: リアルタイム反映
-
-#### 2.2 キャッシュ戦略
-- **今日のメニュー**: 5分キャッシュ
-- **月間メニュー**: 24時間キャッシュ
-- **重複リクエスト防止**: SWR dedupingInterval設定
-
-#### 2.3 データ取得最適化仕様
-
-##### 通信エラー時リトライ設定
-
-**グローバル設定** (`src/lib/swr-config.js`)
-- **エラーリトライ回数**: `0回` (自動リトライ無効)
-- **ローディングタイムアウト**: `15秒`
-- **重複リクエスト防止**: `30分`
-
-**今日の献立データ** (`useTodayMenu`)
-- **通常更新間隔**: `無効` (自動更新停止)
-- **エラーリトライ回数**: `0回`
-- **フォーカス時更新**: 無効 (タブ切り替え時の不要リクエスト防止)
-- **再接続時更新**: 有効 (ネットワーク復帰時のみ)
-- **重複リクエスト防止**: `30分`
-
-**月間献立データ** (`useMonthlyMenus`)
-- **通常更新間隔**: `無効` (完全に停止)
-- **エラーリトライ回数**: `0回`
-- **フォーカス時更新**: 無効
-- **再接続時更新**: 無効
-- **重複リクエスト防止**: `24時間`
-
-**最適化の特徴**
-- **10秒周期リクエスト問題**: 完全解決
-- **タブ切り替え時リクエスト**: 防止済み
-- **不要な再レンダリング**: 最小化
-
-##### パフォーマンス最適化フロー
-1. **初期ロード**: 必要最小限のデータ取得
-2. **キャッシュ活用**: 長期間キャッシュでリクエスト数最小化
-3. **エラー状態**: グレースフル degradation、既存データ表示継続
-4. **手動更新**: ユーザー操作時のみデータ再取得
-
-##### 最適化の効果
-- **ページ読み込み速度**: 大幅改善
-- **不要なAPI呼び出し**: 完全排除
-- **ユーザー体験**: スムーズな操作感
-- **サーバー負荷**: 軽減
-
----
-
-## 🗄️ データモデル
-
-### Menu Entity
+### セキュリティルール
 ```javascript
-{
-  date: string,           // YYYY-MM-DD
-  district: string,       // A, B, C
-  dayOfWeek: string,      // 曜日
-  menu: {
-    items: string[],      // メニュー項目
-    description: string   // 説明
-  },
-  nutrition: {
-    energy: number,       // カロリー (kcal)
-    protein: number       // タンパク質 (g)
-  },
-  hasSpecialMenu: boolean,
-  notes: string | null
+// firestore.rules
+rules_version = "2";
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if true;        // パブリック読み取りアクセス
+      allow write: if false;      // クライアント書き込みなし
+    }
+  }
 }
 ```
 
+---
+
+## コンポーネントアーキテクチャ
+
+### コンポーネント階層
+
+#### ページコンポーネント
+```
+pages/
+├── index.js           # メインアプリケーションページ
+├── _app.js           # アプリ設定とプロバイダー
+├── _error.tsx        # エラー境界
+├── admin/import.js   # データインポートインターフェース
+└── api/              # APIエンドポイント
+```
+
+#### UIコンポーネント構造
+```
+components/
+├── common/
+│   ├── Header.js          # ナビゲーションと地区選択
+│   ├── Loading.js         # ローディング状態
+│   ├── ErrorMessage.js    # エラー表示
+│   └── StatsCards.js      # 月間統計
+├── menu/
+│   └── MenuCard.js        # 個別メニュー表示
+├── pwa/
+│   ├── InstallPWAButton.js
+│   └── InstallInstructionsModal.js
+├── share/
+│   ├── ShareButton.js
+│   └── ShareModal.js
+└── webview/
+    ├── LINEWebViewDetector.js
+    └── OpenInBrowserModal.js
+```
+
+### コンポーネントパターン
+
+#### データフェッチングパターン
+- **SWR統合:** 全コンポーネントでデータフェッチングにSWRを使用
+- **ローディング状態:** 全コンポーネント間で一貫したローディングUI
+- **エラー境界:** フォールバックUIによる優雅なエラーハンドリング
+- **オフラインサポート:** ネットワーク利用不可時にキャッシュされたデータを表示
+
+#### 状態管理パターン
+- **グローバル状態:** localStorageで永続化された地区選択
+- **サーバー状態:** SWRが全てのサーバーデータフェッチングとキャッシュを管理
+- **コンポーネント状態:** Reactフックでローカル UI状態を管理
+
+#### アクセシビリティ機能
+- **ARIAラベル:** スクリーンリーダーサポートの包括的対応
+- **セマンティックHTML:** 適切な見出し階層とランドマーク
+- **キーボードナビゲーション:** 完全なキーボードアクセシビリティ
+- **高コントラスト:** 十分なコントラスト比でのSolarizedカラースキーム
+- **フォーカス管理:** 明確なフォーカスインジケータ
 
 ---
 
-## 🔌 API仕様
+## APIレイヤーアーキテクチャ
 
-### v1 API (メイン運用)
-```
-GET /api/menu/today?date={date}&district={district}
-GET /api/menu/monthly?year={year}&month={month}&district={district}
-```
+### APIエンドポイント
 
-### v2 API (Clean Architecture対応・実験的)
-```
-GET /api/v2/menu/today?date={date}&district={district}
-```
-
-### 共通レスポンス形式
-```javascript
-{
-  success: boolean,
-  data: object | array,
+#### メニューAPI (`/api/menu/`)
+```typescript
+// GET /api/menu/today?date=2025-08-27&district=A
+interface TodayMenuResponse {
+  success: boolean;
+  data: {
+    date: string;
+    district: 'A' | 'B' | 'C';
+    dayOfWeek: string;
+    menu: {
+      items: string[];
+      description?: string;
+    };
+    nutrition: {
+      energy: number;
+      protein: number;
+    };
+    hasSpecialMenu: boolean;
+    notes?: string;
+  };
   metadata: {
-    requestId: string,
-    timestamp: string,
-    cached: boolean,
-    query: object
-  },
-  error?: string,
-  message?: string
+    requestId: string;
+    timestamp: string;
+    query: object;
+    rateLimit: object;
+  };
 }
+
+// GET /api/menu/monthly?year=2025&month=9&district=A
+interface MonthlyMenuResponse {
+  success: boolean;
+  data: TodayMenuResponse['data'][];
+  metadata: MonthlyMetadata;
+}
+```
+
+### セキュリティ・バリデーション
+
+#### 入力バリデーション（Zodスキーマ）
+```javascript
+// 今日のメニューバリデーション
+const todaySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  district: z.enum(['A', 'B', 'C'])
+});
+
+// 月間メニューバリデーション
+const monthlySchema = z.object({
+  year: z.coerce.number().int().min(2024).max(2030),
+  month: z.coerce.number().int().min(1).max(12),
+  district: z.enum(['A', 'B', 'C'])
+});
+```
+
+#### レート制限
+- **Upstash Redis:** サーバーレス関数間での分散レート制限
+- **制限:** IP+Origin+Path組み合わせで毎分10リクエスト
+- **ヘッダー:** レスポンスで標準レート制限ヘッダー
+- **フォールバック:** Redis利用不可時の優雅な劣化
+
+#### CORS設定
+- **許可されたオリジン:** 本番ドメイン + 開発用localhost
+- **メソッド:** GET、OPTIONSのみ
+- **ヘッダー:** 標準セキュリティヘッダー
+- **認証情報:** 非サポート（パブリックAPI）
+
+---
+
+## セキュリティアーキテクチャ
+
+### クライアント側セキュリティ
+
+#### コンテンツセキュリティポリシー
+```javascript
+// Next.jsセキュリティヘッダー経由で実装
+headers: {
+  'X-XSS-Protection': '1; mode=block',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
+}
+```
+
+#### 入力サニタイゼーション
+- **Zodバリデーション:** 厳格なスキーマによる全API入力バリデーション
+- **SQLインジェクション防止:** NoSQL Firestoreによるインジェクション攻撃防止
+- **XSS防止:** ReactのビルトインXSS保護 + CSPヘッダー
+
+### APIセキュリティ
+
+#### 認証モデル
+- **読み取りアクセス:** パブリック（認証不要）
+- **書き込みアクセス:** 管理者のみ（Firebase Admin SDK）
+- **レート制限:** Redis分散ストレージによるIPベース
+
+#### エラーハンドリング
+- **カスタムエラークラス:** `RateLimitError`, `ValidationError`, `OriginError`
+- **サニタイズされたレスポンス:** エラーメッセージに機密情報なし
+- **Sentry統合:** 自動エラー報告とアラート
+
+### データプライバシー
+- **PII不使用:** アプリケーションは公開メニューデータのみ処理
+- **アナリティクス:** 最小限、プライバシー重視のアナリティクス
+- **クッキー:** 機能のための必須クッキーのみ
+
+---
+
+## インフラストラクチャアーキテクチャ
+
+### デプロイメントアーキテクチャ
+
+#### 本番環境
+```
+[ユーザー] -> [Vercel Edge Network] -> [Vercel上のNext.jsアプリ]
+                                         |
+                                    [Firebase Auth]
+                                         |
+                                [Google Cloud Firestore]
+                                         |
+                                   [Upstash Redis]
+```
+
+#### 開発環境
+```
+[開発者] -> [ローカルNext.js] -> [Firebase Emulators]
+                    |
+              [ローカルRedis] (オプション)
+```
+
+### スケーリング戦略
+- **サーバーレス関数:** Vercel経由のAPIエンドポイント自動スケーリング
+- **CDN:** 静的アセットのグローバルエッジ配信
+- **データベース:** 地域レプリケーション付きFirestore自動スケーリング
+- **キャッシュ:** マルチレイヤーキャッシュ（CDN、Redis、SWR）
+
+---
+
+## パフォーマンス最適化
+
+### フロントエンド最適化
+
+#### コード分割
+- **動的インポート:** オンデマンドでロードされるモーダルコンポーネント
+- **バンドル分析:** Webpack bundle analyzer統合
+- **ツリーシェーキング:** 未使用コードの除去
+
+#### データフェッチング戦略
+```javascript
+// SWRでのスマートキャッシュ
+const { data, error, isLoading } = useSWR(apiUrl, fetcher, {
+  refreshInterval: 0,           // ポーリングなし
+  revalidateOnFocus: false,     // フォーカス時再取得なし
+  revalidateOnReconnect: true,  // 再接続時再取得
+  dedupingInterval: 30 * 60 * 1000, // 30分重複排除
+  errorRetryCount: 0,           // 自動リトライなし
+});
+```
+
+#### 画像・アセット最適化
+- **Next.js Image:** 自動画像最適化
+- **アイコンシステム:** 一貫した最適化アイコン用Lucide React
+- **フォント読み込み:** 高速レンダリング用システムフォント
+
+### バックエンド最適化
+
+#### データベースクエリ
+- **複合インデックス:** クエリ用に最適化されたFirestoreインデックス
+- **クエリ制限:** 高コスト操作を防ぐ合理的制限
+- **キャッシュ:** 頻繁にアクセスされるデータのRedisキャッシュ
+
+#### APIレスポンス最適化
+- **レスポンス圧縮:** Gzip圧縮有効
+- **最小ペイロード:** レスポンスに必要なデータのみ含める
+- **HTTPキャッシュ:** 異なるコンテンツタイプに適切なキャッシュヘッダー
+
+---
+
+## ドメイン駆動設計（DDD）実装
+
+### ドメインモデル
+
+#### コアエンティティ
+```javascript
+// ビジネスロジック付きMenuエンティティ
+class Menu {
+  constructor({ date, district, dayOfWeek, menu, nutrition, hasSpecialMenu, notes }) {
+    this.validateInputs({ date, district, menu, nutrition });
+    // ... プロパティの割り当て
+  }
+
+  isSpecial() {
+    return this.hasSpecialMenu || 
+           this.menu.items.some(item => 
+             item.includes('★') || item.includes('⭐') || item.includes('特別')
+           );
+  }
+
+  getDocumentId() {
+    return `${this.date}-${this.district}`;
+  }
+
+  // 追加ビジネスメソッド...
+}
+```
+
+#### リポジトリパターン
+```javascript
+// 抽象リポジトリインターフェース
+class MenuRepository {
+  async getTodayMenu(date, district) { throw new Error('Not implemented'); }
+  async getMonthlyMenus(year, month, district) { throw new Error('Not implemented'); }
+  async saveMenu(menu) { throw new Error('Not implemented'); }
+}
+
+// Firebase実装
+class FirebaseMenuRepository extends MenuRepository {
+  async getTodayMenu(date, district) {
+    const docId = `${date}-${district}`;
+    const docSnap = await getDoc(doc(db, 'kawasaki_menus', docId));
+    return docSnap.exists() ? Menu.fromFirestoreData(docSnap.data()) : null;
+  }
+}
+```
+
+### 境界付きコンテキスト
+- **メニューコンテキスト:** 給食メニュー管理のコアドメイン
+- **ユーザーコンテキスト:** 地区選択と設定
+- **通知コンテキスト:** システム通知と更新
+
+---
+
+## 開発・デプロイメント
+
+### 開発ワークフロー
+
+#### ローカル開発セットアップ
+```bash
+# 環境セットアップ
+npm install
+cp .env.example .env.local
+
+# 開発サーバー
+npm run dev              # 開発サーバー起動
+firebase emulators:start # Firebase エミュレータ起動
+
+# 品質保証
+npm run lint            # ESLint チェック
+npm run build           # 本番ビルドテスト
+```
+
+#### ビルド・デプロイメント
+```bash
+# 本番ビルド
+npm run build
+npm run start
+
+# Vercel デプロイメント
+npx vercel --prod       # 本番デプロイ
+```
+
+### 環境設定
+```javascript
+// 環境変数
+NEXT_PUBLIC_FIREBASE_API_KEY=           # Firebase設定
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+UPSTASH_REDIS_URL=                      # Redisキャッシュ
+UPSTASH_REDIS_TOKEN=
+
+SENTRY_ORG=                             # エラー監視
+SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=
 ```
 
 ---
 
-## 🛡️ セキュリティ仕様
+## 監視・可観測性
 
-### 1. CORS設定
-- **本番環境**: `https://www.kawasaki-kyushoku.jp`のみ許可
-- **開発環境**: `localhost`ポート許可
-- **プリフライト**: OPTIONS リクエスト対応
-- **Origin検証**: 厳格な検証ロジック実装
+### エラー監視（Sentry）
+- **エラー追跡:** 自動エラーキャプチャと報告
+- **パフォーマンス監視:** APIレスポンス時間とデータベースクエリ
+- **ユーザーフィードバック:** ユーザーフィードバック収集との統合
+- **リリース追跡:** デプロイメントとリリース監視
 
-### 2. レート制限
-- **今日のメニュー**: 10リクエスト/分/IP
-- **月間メニュー**: 5リクエスト/分/IP (重いクエリのため)
-- **実装**: Upstash Redis
-- **ヘッダー**: `X-RateLimit-*` による通知
-- **フォールバック**: Redis障害時はリクエスト許可
+### アプリケーションメトリクス
+- **SWRメトリクス:** キャッシュヒット率とデータフェッチングパフォーマンス
+- **ユーザーアナリティクス:** 基本的使用パターン（プライバシー準拠）
+- **APIメトリクス:** リクエスト率、エラー率、レスポンス時間
 
-### 3. セキュリティヘッダー
-- **XSS Protection**: `X-XSS-Protection: 1; mode=block`
-- **Content Type Options**: `X-Content-Type-Options: nosniff`
-- **Frame Options**: `X-Frame-Options: DENY`
-- **Referrer Policy**: `Referrer-Policy: strict-origin-when-cross-origin`
-- **DNS Prefetch Control**: `X-DNS-Prefetch-Control: on`
-- **Permissions Policy**: カメラ・マイク等の制限
-
-### 4. 入力検証
-- **バリデーション**: Zod スキーマによる厳格な型チェック
-- **サニタイゼーション**: XSS対策、SQLインジェクション対策
-- **データ制限**: 未来データ取得制限、最大件数制限
-- **不正パラメータ**: 自動除去とログ記録
-
-### 5. 環境変数セキュリティ
-- **機密情報**: プレースホルダー値でデフォルト設定
-- **警告コメント**: セキュリティリスクの明記
-- **.gitignore**: 証明書・秘密鍵・ログファイル等の保護
-- **バージョン管理**: 機密情報の履歴から完全除去
-
-### 6. 脆弱性対策
-- **Next.js**: v14.2.32（重要なセキュリティパッチ適用済み）
-- **依存関係監視**: npm audit による定期チェック
-- **残存脆弱性**: Firebase関連の間接依存（影響範囲限定的）
-
-### 7. エラーハンドリング
-- **監視**: Sentry統合
-- **ログ**: 構造化ログ出力
-- **情報漏洩防止**: エラーメッセージのサニタイズ
-- **フォールバック**: グレースフル degradation
+### ログ戦略
+- **開発:** 詳細情報付きコンソールログ
+- **本番:** Sentry統合による構造化ログ
+- **APIログ:** リクエストIDによるリクエスト/レスポンスログ
 
 ---
 
-## 📊 パフォーマンス仕様
+## 将来の検討事項
 
-### 1. キャッシュ戦略
-- **CDN**: Vercel Edge Network
-- **API Cache**: `Cache-Control` ヘッダー
-- **Client Cache**: SWR + LocalStorage
-- **Memory Cache**: InMemoryCache Service
+### 予定されている機能強化
+- **多言語サポート:** 国際家族向け英語言語サポート
+- **高度な通知:** メニュー更新のプッシュ通知
+- **栄養分析:** 詳細な栄養分析とアレルゲン情報
+- **カレンダー統合:** カレンダーアプリケーションへのエクスポート
+- **食事計画:** 週間食事計画機能
 
-### 2. 最適化
-- **画像**: Next.js Image Optimization
-- **バンドル**: Tree Shaking, Code Splitting, Package Import Optimization
-- **CSS**: Tailwind Purge
-- **フォント**: Google Fonts最適化
-- **Header圧縮**: Gzip/Brotli圧縮有効
-- **X-Powered-By**: セキュリティのため無効化
+### 技術的負債・改善
+- **TypeScript移行:** JavaScriptからTypeScriptへの段階的移行
+- **テストカバレッジ:** ユニットテストと統合テストの実装
+- **パフォーマンス監視:** 強化されたパフォーマンス追跡と最適化
+- **アクセシビリティ監査:** 定期的なアクセシビリティテストと改善
 
-### 3. パフォーマンス指標
-- **FCP**: < 1.5秒
-- **LCP**: < 2.5秒
-- **CLS**: < 0.1
-- **API Response**: < 500ms
-- **バンドルサイズ**: メインページ187KB、管理画面249KB
-- **ビルド時間**: 大幅改善（最適化により）
+### スケーラビリティの検討
+- **多都市サポート:** 川崎市外への拡張アーキテクチャ
+- **リアルタイム更新:** ライブ更新のためのWebSocket統合
+- **モバイルアプリ:** ネイティブモバイルアプリケーション開発
+- **APIバージョニング:** 正式なAPIバージョニング戦略
 
 ---
 
-## 🚀 デプロイメント
+## まとめ
 
-### 本番環境
-- **Platform**: Vercel
-- **Domain**: `https://www.kawasaki-kyushoku.jp`
-- **Database**: Firebase Firestore (本番プロジェクト)
-- **Cache**: Upstash Redis
+川崎給食ナビアプリケーションは、React/Next.jsとFirebaseで構築された現代的でスケーラブルなウェブアプリケーションです。アーキテクチャはユーザーエクスペリエンス、アクセシビリティ、保守性を優先しながら、川崎市の家族に学校給食メニュー情報への信頼できるアクセスを提供します。
 
-### 開発環境
-- **Local**: `npm run dev` (localhost:3000)
-- **Firebase**: Emulator対応
-- **Hot Reload**: Fast Refresh
-
-### CI/CD
-- **Git**: GitHub
-- **Deploy**: Vercel GitHub連携
-- **Env Variables**: Vercel Dashboard管理
+ドメイン駆動設計原則と組み合わせたクリーンアーキテクチャアプローチにより、要件が進化してもコードベースが保守可能で拡張可能であることが保証されます。包括的なセキュリティモデルとパフォーマンス最適化により、川崎コミュニティにサービスを提供するための本番対応の基盤が提供されます。
 
 ---
 
-## 🧪 テスト仕様
-
-### 単体テスト
-- **Entities**: ビジネスロジックテスト
-- **Use Cases**: ユースケーステスト
-- **Repositories**: モックを使用したテスト
-
-### 統合テスト
-- **API**: エンドポイントテスト
-- **UI**: React Testing Library
-
-### E2Eテスト
-- **主要フロー**: メニュー表示、地区変更、給水スポット検索
-
----
-
-## 📝 開発ガイドライン
-
-### 1. クリーンアーキテクチャの原則
-- **Single Responsibility**: 各層は単一の責任を持つ
-- **Dependency Inversion**: 抽象に依存し、具象に依存しない
-- **Open/Closed**: 拡張に開き、修正に閉じる
-
-### 2. コーディング規約
-- **命名**: 日本語コメント + 英語変数名
-- **ファイル**: 機能別ディレクトリ分け
-- **Import**: 相対パス回避、絶対パス使用
-
-### 3. 段階的移行戦略
-- **Phase 1**: 新アーキテクチャ導入（完了）
-- **Phase 2**: 既存コードの段階的移行
-- **Phase 3**: 旧コードの削除とクリーンアップ
-
----
-
-## 🔮 今後の拡張計画
-
-### 短期（3ヶ月）
-- [x] セキュリティ監査と脆弱性修正
-- [x] パフォーマンス最適化
-- [x] コード品質改善とリファクタリング
-- [ ] 既存フック・コンポーネントのClean Architecture移行
-- [ ] テストカバレッジ向上
-
-### 中期（6ヶ月）
-- [ ] 給水スポット機能の独立アプリ開発
-- [ ] PWA機能強化
-- [ ] アクセシビリティ向上
-- [ ] Firebase関連脆弱性の解決（公式アップデート待ち）
-
-### 長期（1年）
-- [ ] TypeScript完全移行
-- [ ] マイクロサービス化検討
-- [ ] リアルタイム機能追加
-
----
-
-## 📞 サポート・連絡先
-
-**開発チーム**: かわさき給食ナビ開発チーム  
-**Email**: contact@kawasaki-kyushoku.jp  
-**Repository**: [GitHub](https://github.com/kawasaki-kyushoku-navi)  
-**Issues**: GitHubのIssue管理  
-
----
-
-## 📄 ライセンス
-
-このプロジェクトは[MIT License](../LICENSE)の下で公開されています。
-
----
-
-**最終更新**: 2025年8月25日  
-**ドキュメントバージョン**: 2.1.0
-
-## 📈 更新履歴
-
-### v2.1.0 (2025-08-25)
-- セキュリティ強化: Next.js v14.2.32アップデート、包括的セキュリティヘッダー実装
-- パフォーマンス最適化: SWR設定最適化、不要リクエスト完全排除
-- アーキテクチャ整理: 給水スポット機能削除、メニュー機能に特化
-- コード品質向上: React最適化、依存関係整理
-- 脆弱性対策: 10件の重要な脆弱性修正
-
-### v2.0.0 (2025-08-24)
-- Clean Architecture導入
-- 給水スポット機能追加
-- v2 API実装
+*この文書は、川崎給食ナビアプリケーションの権威的なアーキテクチャリファレンスとして機能します。システムに重要なアーキテクチャ変更が加えられる際は常に更新する必要があります。*
