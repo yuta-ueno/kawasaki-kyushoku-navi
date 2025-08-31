@@ -12,11 +12,11 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
 
-  // セキュリティヘッダー
+  // セキュリティヘッダー（静的ファイルを除外）
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/((?!_next/static|favicon.ico).*)',
         headers: [
           // XSS Protection
           {
