@@ -6,6 +6,7 @@ import { getClientIP } from './api-utils'
 const ALLOWED_ORIGINS = {
   production: [
     'https://www.kawasaki-kyushoku.jp',
+    'https://kawasaki-kyushoku.jp',
     // 将来追加予定
     // 'https://www.city.kawasaki.jp',
     // 'https://city.kawasaki.jp'

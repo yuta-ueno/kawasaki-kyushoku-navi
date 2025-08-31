@@ -137,6 +137,11 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
             <br />
             しばらく後に自動で再試行されます
           </p>
+          {process.env.NODE_ENV === 'development' && (
+            <p className="text-xs text-solarized-base00 mt-2 bg-solarized-base03 p-2 rounded">
+              エラー詳細: {error}
+            </p>
+          )}
         </div>
       </div>
     )
