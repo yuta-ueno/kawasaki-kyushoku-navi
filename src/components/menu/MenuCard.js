@@ -48,7 +48,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
 
     if (Array.isArray(menu.menu.items)) {
       return menu.menu.items.filter(item => 
-        item && item.trim() && item.trim() !== 'ぎゅうにゅう'
+        item && item.trim()
       )
     }
 
