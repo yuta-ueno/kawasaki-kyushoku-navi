@@ -215,10 +215,18 @@ export function isValidJSTDate(dateString) {
  * @returns {string} YYYY-MM-DD形式の今日の日付
  */
 export function getTodayJST() {
+  // 本番環境（Vercel/UTC）でも正確な日本時間の日付を取得
   const now = new Date()
-  const jstOffset = 9 * 60 // 日本時間は UTC+9
-  const jstTime = new Date(now.getTime() + (jstOffset * 60 * 1000))
-  return jstTime.toISOString().split('T')[0]
+  
+  // 日本時間に変換（UTC+9）
+  const japanTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }))
+  
+  // YYYY-MM-DD形式で返却
+  const year = japanTime.getFullYear()
+  const month = String(japanTime.getMonth() + 1).padStart(2, '0')
+  const day = String(japanTime.getDate()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}`
 }
 
 /**

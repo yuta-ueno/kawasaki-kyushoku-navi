@@ -1,13 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { swrConfig } from '../lib/swr-config'
-
-// JST基準で今日の日付を取得
-const getTodayJST = () => {
-  const now = new Date()
-  const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-  return jstDate.toISOString().split('T')[0]
-}
+import { getTodayJST } from '../lib/validation'
 
 // 🏫 学校選択管理
 export function useSchoolSelection() {
