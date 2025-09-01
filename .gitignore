@@ -100,3 +100,6 @@ coverage/
 
 # Serena MCP tool cache and memory files
 .serena/
+
+# Documentation files (internal use only)
+docs/
