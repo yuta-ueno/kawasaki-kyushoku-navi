@@ -173,7 +173,7 @@ export default function HomePage() {
 
             {/* 新しいMenuCardコンポーネントを使用（内部でSWRフックを呼び出し） */}
             <div className="max-w-2xl">
-              <MenuCard isToday={true} />
+              <MenuCard isToday={true} selectedSchool={app.selectedSchool} />
             </div>
           </section>
 

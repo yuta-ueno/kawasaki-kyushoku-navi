@@ -30,13 +30,15 @@ const getDayColor = dayOfWeek => {
   )
 }
 
-const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
-  const { selectedSchool } = useSchoolSelection()
+const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool = null }) => {
+  // selectedSchoolが渡されない場合のフォールバック
+  const { selectedSchool: fallbackSchool } = useSchoolSelection()
+  const activeSchool = selectedSchool || fallbackSchool
   
   // menuDataが渡されている場合はSWRフックを呼び出さない
   const shouldFetch = !menuData
   const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
-    selectedSchool,
+    activeSchool,
     shouldFetch ? (debugDate || undefined) : null // undefinedでも今日の日付が使用される
   )
 
@@ -49,7 +51,9 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
     debugDate,
     menuData: !!menuData,
     shouldFetch,
-    selectedSchool,
+    selectedSchool: fallbackSchool,
+    passedSchool: selectedSchool,
+    activeSchool,
     fetchedMenu: !!fetchedMenu,
     loading,
     error,
