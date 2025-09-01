@@ -37,7 +37,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
   const shouldFetch = !menuData
   const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
     selectedSchool,
-    shouldFetch ? debugDate : null // nullを渡すとSWRが無効化される
+    shouldFetch ? (debugDate || undefined) : null // undefinedでも今日の日付が使用される
   )
 
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
