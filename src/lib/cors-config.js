@@ -7,6 +7,11 @@ const ALLOWED_ORIGINS = {
   production: [
     'https://www.kawasaki-kyushoku.jp',
     'https://kawasaki-kyushoku.jp',
+    // Vercel deployment domains
+    'https://kawasaki-kyushoku-navi-anucrj3xh-yutas-projects-fc6b6de6.vercel.app',
+    'https://kawasaki-kyushoku-navi-cqh948chk-yutas-projects-fc6b6de6.vercel.app',
+    // Vercel domain pattern
+    'https://kawasaki-kyushoku-navi*.vercel.app',
     // 将来追加予定
     // 'https://www.city.kawasaki.jp',
     // 'https://city.kawasaki.jp'
@@ -81,6 +86,14 @@ export function isOriginAllowed(origin) {
     if (origin === allowed || 
         origin === allowed.replace('https://', 'http://') || 
         origin === allowed.replace('http://', 'https://')) {
+      return true
+    }
+  }
+  
+  // Vercelドメインのワイルドカードマッチング
+  if (origin.includes('vercel.app')) {
+    const vercelPattern = /https:\/\/kawasaki-kyushoku-navi.*\.vercel\.app$/
+    if (vercelPattern.test(origin)) {
       return true
     }
   }
