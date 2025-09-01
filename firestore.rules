@@ -1,9 +1,49 @@
 rules_version = "2";
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    // 既存のメニューデータは読み取り専用
+    match /kawasaki_menus/{document} {
       allow read: if true;
       allow write: if false;
     }
+    
+    // フィードバックコレクションは書き込み許可
+    match /feedback/{document} {
+      allow read: if false; // 管理者のみ読み取り可能にする場合
+      allow write: if validateFeedback(resource, request);
+    }
+    
+    // その他のコレクションはデフォルトで拒否
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
   }
+}
+
+// フィードバックデータのバリデーション関数
+function validateFeedback(resource, request) {
+  let data = request.resource.data;
+  
+  // 必須フィールドの存在確認
+  return data.keys().hasAll(['rating', 'comment', 'district', 'timestamp', 'ip', 'userAgent']) &&
+    
+    // 評価は1-5の整数
+    data.rating is int &&
+    data.rating >= 1 &&
+    data.rating <= 5 &&
+    
+    // コメントは50文字以内の文字列
+    data.comment is string &&
+    data.comment.size() <= 50 &&
+    
+    // 地区は有効な値
+    data.district in ['A', 'B', 'C'] &&
+    
+    // タイムスタンプは文字列
+    data.timestamp is string &&
+    
+    // IPとUserAgentは文字列
+    data.ip is string &&
+    data.userAgent is string;
 }

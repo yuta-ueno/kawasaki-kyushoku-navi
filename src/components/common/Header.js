@@ -10,9 +10,192 @@ import {
   AlertTriangle,
   Star,
   Info,
+  MessageSquare,
 } from 'lucide-react'
 import InstallPWAButton from '../pwa/InstallPWAButton'
 import ShareButton from '../share/ShareButton'
+
+// フィードバックモーダルコンポーネント
+const FeedbackModal = ({ isOpen, onClose, selectedDistrict }) => {
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState(null) // 'success' | 'error'
+
+  // モーダルを閉じる際のリセット
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setRating(0)
+      setComment('')
+      setSubmitStatus(null)
+      onClose()
+    }
+  }
+
+  // フィードバック送信処理
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (rating === 0 || comment.trim() === '') {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitStatus(null)
+
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating,
+          comment: comment.trim(),
+          district: selectedDistrict
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        // 3秒後にモーダルを閉じる
+        setTimeout(() => {
+          handleClose()
+        }, 3000)
+      } else {
+        throw new Error(data.message || 'フィードバックの送信に失敗しました')
+      }
+    } catch (error) {
+      console.error('Feedback submission error:', error)
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <>
+      {/* オーバーレイ */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300"
+        onClick={handleClose}
+      />
+
+      {/* モーダル本体 */}
+      <div className="fixed inset-4 md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:inset-auto md:w-full md:max-w-md bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
+        {/* ヘッダー */}
+        <div className="bg-gradient-to-r from-solarized-green to-solarized-cyan text-solarized-base3 p-6 flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <MessageSquare className="w-6 h-6" />
+            <h2 className="text-xl font-bold">フィードバック</h2>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="p-2 rounded-full bg-solarized-base3 bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 disabled:opacity-50"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 成功・エラーメッセージ */}
+        {submitStatus === 'success' && (
+          <div className="bg-green-50 border-l-4 border-green-400 p-4">
+            <div className="flex items-center">
+              <div className="text-green-600 text-sm font-medium">
+                ✅ フィードバックを受け付けました。ありがとうございます！
+              </div>
+            </div>
+          </div>
+        )}
+
+        {submitStatus === 'error' && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="flex items-center">
+              <div className="text-red-600 text-sm font-medium">
+                ❌ 送信に失敗しました。しばらく後に再試行してください。
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* フォームエリア */}
+        <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6">
+          {/* 評価セクション */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              評価をお聞かせください
+            </label>
+            <div className="flex justify-center space-x-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  disabled={isSubmitting}
+                  className={`text-3xl transition-colors duration-200 disabled:opacity-50 ${
+                    star <= rating 
+                      ? 'text-solarized-yellow hover:text-solarized-orange' 
+                      : 'text-gray-300 hover:text-solarized-yellow'
+                  }`}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+            <div className="text-center text-sm text-gray-500 mt-2">
+              {rating > 0 && `${rating}/5`}
+            </div>
+          </div>
+
+          {/* コメントセクション */}
+          <div>
+            <label htmlFor="feedback-comment" className="block text-sm font-medium text-gray-700 mb-2">
+              コメント（50文字以内）
+            </label>
+            <textarea
+              id="feedback-comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value.slice(0, 50))}
+              disabled={isSubmitting}
+              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-solarized-blue focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
+              rows={3}
+              placeholder="アプリの感想やご要望をお聞かせください"
+              maxLength={50}
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>簡潔なご意見をお願いします</span>
+              <span>{comment.length}/50</span>
+            </div>
+          </div>
+
+          {/* 送信ボタン */}
+          <div className="flex space-x-3">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              キャンセル
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || rating === 0 || comment.trim() === '' || submitStatus === 'success'}
+              className="flex-1 px-4 py-2 bg-solarized-green text-white rounded-lg hover:bg-solarized-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? '送信中...' : '送信'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
+  )
+}
 
 // お知らせポップアップコンポーネント
 const NotificationPopup = ({ isOpen, onClose }) => {
@@ -179,6 +362,9 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
   // お知らせポップアップの状態管理（追加）
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
+  
+  // フィードバックモーダルの状態管理
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
   const router = useRouter()
 
   const districts = [
@@ -234,6 +420,15 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
 
             {/* 右側のコントロール */}
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              {/* フィードバックボタン */}
+              <button
+                onClick={() => setIsFeedbackOpen(true)}
+                className="relative p-1.5 sm:p-2 text-solarized-base0 hover:text-solarized-base01 hover:bg-solarized-base2 rounded-lg transition-colors"
+                title="フィードバックを送る"
+              >
+                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+
               {/* 通知アイコン（機能追加） */}
               <button
                 onClick={() => {
@@ -314,6 +509,13 @@ const Header = ({ selectedDistrict, setSelectedDistrict }) => {
           </div>
         </div>
       </header>
+
+      {/* フィードバックモーダル */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        selectedDistrict={selectedDistrict}
+      />
 
       {/* お知らせポップアップ */}
       <NotificationPopup

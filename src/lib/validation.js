@@ -245,3 +245,42 @@ export function logValidation(apiName, input, result) {
     })
   }
 }
+
+// =============================================================================
+// フィードバック用スキーマ
+// =============================================================================
+
+/**
+ * フィードバックAPI用スキーマ
+ * 評価（1-5）とコメント（50文字以内）、地区を必須とする
+ */
+export const feedbackSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5).refine(
+    (rating) => Number.isInteger(rating),
+    { message: '評価は1から5までの整数で入力してください' }
+  ),
+  comment: z.string().max(50, {
+    message: 'コメントは50文字以内で入力してください'
+  }).refine(
+    (comment) => comment.trim().length > 0,
+    { message: 'コメントを入力してください' }
+  ),
+  district: districtSchema.refine(
+    (district) => ['A', 'B', 'C'].includes(district),
+    { message: '地区はA、B、Cのいずれかを指定してください' }
+  )
+}).refine((data) => {
+  // 追加の検証: 不適切な文字列のフィルタリング
+  const inappropriateWords = ['spam', 'test', 'テスト', 'スパム']
+  const comment = data.comment.toLowerCase()
+  
+  // 基本的なスパムフィルタ（必要に応じて拡張）
+  const hasInappropriate = inappropriateWords.some(word => 
+    comment.includes(word.toLowerCase())
+  )
+  
+  return !hasInappropriate
+}, {
+  message: '不適切な内容が含まれています',
+  path: ['comment']
+})
