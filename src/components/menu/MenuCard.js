@@ -43,6 +43,27 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null }) => {
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
   const menu = menuData || fetchedMenu
 
+  // デバッグ用ログ（本番環境でも一時的に有効）
+  console.log('[MenuCard] Debug Data Flow:', {
+    isToday,
+    debugDate,
+    menuData: !!menuData,
+    shouldFetch,
+    selectedSchool,
+    fetchedMenu: !!fetchedMenu,
+    loading,
+    error,
+    isEmpty,
+    menu: !!menu,
+    menuDetails: menu ? {
+      date: menu.date,
+      dayOfWeek: menu.dayOfWeek,
+      hasMenuItems: menu.menu ? Object.keys(menu.menu).length : 0,
+      menuType: typeof menu.menu,
+      nutrition: menu.nutrition
+    } : null
+  })
+
   const menuItems = useMemo(() => {
     if (!menu?.menu) return []
 

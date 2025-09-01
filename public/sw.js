@@ -61,31 +61,36 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 静的ファイルの場合はキャッシュ優先
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response
-        }
-        return fetch(event.request)
-          .then((response) => {
-            // 正常なレスポンスのみキャッシュ
-            if (response.status === 200 && response.type === 'basic') {
-              const responseToCache = response.clone()
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache)
-                })
-            }
+  // 静的ファイルの場合はキャッシュ優先（GETリクエストのみ）
+  if (event.request.method === 'GET') {
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
             return response
-          })
-      })
-      .catch(() => {
-        // オフライン時のフォールバック
-        if (event.request.destination === 'document') {
-          return caches.match('/')
-        }
-      })
-  )
+          }
+          return fetch(event.request)
+            .then((response) => {
+              // 正常なレスポンスのみキャッシュ
+              if (response.status === 200 && response.type === 'basic') {
+                const responseToCache = response.clone()
+                caches.open(CACHE_NAME)
+                  .then((cache) => {
+                    cache.put(event.request, responseToCache)
+                  })
+              }
+              return response
+            })
+        })
+        .catch(() => {
+          // オフライン時のフォールバック
+          if (event.request.destination === 'document') {
+            return caches.match('/')
+          }
+        })
+    )
+  } else {
+    // POST、PUT、DELETE等のリクエストはキャッシュせずにそのまま通す
+    event.respondWith(fetch(event.request))
+  }
 })
