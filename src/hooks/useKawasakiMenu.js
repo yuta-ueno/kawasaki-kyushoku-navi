@@ -34,6 +34,16 @@ export const useTodayMenu = (district = 'A', date) => {
   // dateがnullの場合はSWRを無効化（月間データ表示時の不要なリクエスト防止）
   const apiUrl = date !== null ? `/api/menu/today?date=${targetDate}&district=${district}` : null
 
+  // デバッグログ追加
+  console.log('[useTodayMenu] Debug:', {
+    originalDate: date,
+    targetDate,
+    district,
+    apiUrl,
+    dateIsNull: date === null,
+    dateIsUndefined: date === undefined
+  })
+
   const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
     refreshInterval: 0,
     revalidateOnFocus: false,
@@ -45,15 +55,42 @@ export const useTodayMenu = (district = 'A', date) => {
     dedupingInterval: 30 * 60 * 1000
   })
 
+  // SWR状態デバッグログ
+  console.log('[useTodayMenu] SWR State:', {
+    apiUrl,
+    data: !!data,
+    error: error?.message || null,
+    isLoading,
+    dataDetails: data ? {
+      success: data.success,
+      hasData: !!data.data,
+      dataType: typeof data.data
+    } : null
+  })
+
+  // APIレスポンス形式を正規化（{success: true, data: {...}} -> {...}）
+  const normalizedData = data?.success ? data.data : data
+
+  console.log('[useTodayMenu] Data Normalization:', {
+    rawData: !!data,
+    normalizedData: !!normalizedData,
+    isApiFormat: data?.success,
+    finalResult: {
+      menu: normalizedData,
+      loading: isLoading,
+      hasData: !!normalizedData
+    }
+  })
+
   return {
-    menu: data,
+    menu: normalizedData,
     loading: isLoading,
     error: error?.message || null,
     refresh: mutate,
-    hasData: !!data,
-    isEmpty: data === null,
+    hasData: !!normalizedData,
+    isEmpty: normalizedData === null,
 
-    lastUpdated: data?.timestamp || null,
+    lastUpdated: normalizedData?.timestamp || null,
     nextCheck: null
   }
 }
