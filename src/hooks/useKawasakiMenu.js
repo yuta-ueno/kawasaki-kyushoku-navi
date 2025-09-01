@@ -294,31 +294,51 @@ export function useKawasakiMenuApp() {
   const isOnline = useOnlineStatus()
 
   const handleSchoolChange = newSchool => {
-    updateSchool(newSchool)
-    
     // 地区切り替え時に関連するSWRキャッシュを強制リフレッシュ
     if (isOnline) {
-      // 今日のメニューキャッシュをクリア&リフレッシュ
       const todayDate = getTodayJST()
-      const todayApiUrl = `/api/menu/today?date=${todayDate}&district=${newSchool}`
-      mutate(todayApiUrl, undefined, { revalidate: true })
-      
-      // 月間メニューキャッシュをクリア&リフレッシュ  
       let targetMonth = currentMonth
       if (currentMonth === 8 && currentYear === 2025) {
         targetMonth = 9
       }
-      const monthlyApiUrl = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
-      mutate(monthlyApiUrl, undefined, { revalidate: true })
+      
+      // 地区を更新
+      updateSchool(newSchool)
+      
+      // すべてのメニュー関連キャッシュを一括クリア（より確実な方法）
+      const cacheKeysToRemove = [
+        `/api/menu/today?date=${todayDate}&district=${selectedSchool}`,
+        `/api/menu/today?date=${todayDate}&district=${newSchool}`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${selectedSchool}`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+      ]
+      
+      // キャッシュを完全にクリア
+      cacheKeysToRemove.forEach(key => {
+        mutate(key, undefined, { revalidate: false })
+      })
+      
+      // 小さな遅延後に新しいデータを取得（Reactの状態更新を待つ）
+      setTimeout(() => {
+        const newTodayApiUrl = `/api/menu/today?date=${todayDate}&district=${newSchool}`
+        const newMonthlyApiUrl = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+        
+        // 新しい地区のデータを強制取得
+        mutate(newTodayApiUrl, undefined, { revalidate: true })
+        mutate(newMonthlyApiUrl, undefined, { revalidate: true })
+        
+        console.log('[District Change] Cache refreshed after delay:', {
+          oldSchool: selectedSchool,
+          newSchool,
+          clearedKeys: cacheKeysToRemove,
+          refreshedUrls: [newTodayApiUrl, newMonthlyApiUrl]
+        })
+      }, 100) // 100ms delay
       
       // 月末のみ翌月データをプリフェッチ
       prefetchNextMonthIfNeeded(newSchool)
-      
-      console.log('[District Change] Cache refreshed for:', { 
-        newSchool, 
-        todayApiUrl, 
-        monthlyApiUrl 
-      })
+    } else {
+      updateSchool(newSchool)
     }
   }
 
