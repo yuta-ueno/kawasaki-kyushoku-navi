@@ -317,11 +317,42 @@ export function useKawasakiMenuApp() {
     // 即座にpendingSchoolを設定（これによりSWRフックが新しい地区で動作開始）
     setPendingSchool(newSchool)
     
+    // SWRキャッシュを強制クリア（ブラウザリロードと同等の効果）
+    if (isOnline) {
+      const todayDate = getTodayJST()
+      let targetMonth = currentMonth
+      if (currentMonth === 8 && currentYear === 2025) {
+        targetMonth = 9
+      }
+      
+      // 関連するすべてのキャッシュキーをクリア
+      const cacheKeysToRemove = [
+        `/api/menu/today?date=${todayDate}&district=${selectedSchool}`,
+        `/api/menu/today?date=${todayDate}&district=${newSchool}`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${selectedSchool}`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+      ]
+      
+      console.log('[District Change] Clearing SWR cache:', cacheKeysToRemove)
+      
+      // キャッシュをクリア（データは残さない）
+      cacheKeysToRemove.forEach(key => {
+        mutate(key, undefined, { revalidate: false })
+      })
+      
+      // 短い遅延後に新しいキーで強制データ取得
+      setTimeout(() => {
+        const newTodayKey = `/api/menu/today?date=${todayDate}&district=${newSchool}`
+        const newMonthlyKey = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+        
+        console.log('[District Change] Force revalidating:', { newTodayKey, newMonthlyKey })
+        
+        mutate(newTodayKey, undefined, { revalidate: true })
+        mutate(newMonthlyKey, undefined, { revalidate: true })
+      }, 50)
+    }
     
-    console.log('[District Change] Immediate district change using pendingSchool:', { newSchool, activeSchool: newSchool })
-    
-    // pendingSchoolによってSWRフックが即座に新しい地区でデータ取得を開始
-    // 追加のキャッシュ操作は不要（React Hookの自然な動作に任せる）
+    console.log('[District Change] Completed using pendingSchool + cache clear')
   }
 
   // 月末のプリフェッチ（アプリ起動時）- 削除（10秒後のリクエスト防止）
