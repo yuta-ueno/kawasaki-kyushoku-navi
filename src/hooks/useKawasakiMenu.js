@@ -294,6 +294,11 @@ export function useKawasakiMenuApp() {
   const isOnline = useOnlineStatus()
 
   const handleSchoolChange = newSchool => {
+    console.log('[handleSchoolChange] Starting district change:', { oldSchool: selectedSchool, newSchool })
+    
+    // まず地区を更新（これによりSWRフックのキーが変更される）
+    updateSchool(newSchool)
+    
     // 地区切り替え時に関連するSWRキャッシュを強制リフレッシュ
     if (isOnline) {
       const todayDate = getTodayJST()
@@ -302,43 +307,46 @@ export function useKawasakiMenuApp() {
         targetMonth = 9
       }
       
-      // 地区を更新
-      updateSchool(newSchool)
-      
-      // すべてのメニュー関連キャッシュを一括クリア（より確実な方法）
-      const cacheKeysToRemove = [
+      // すべてのメニュー関連キャッシュを一括クリア
+      const allCacheKeys = [
+        // 旧地区のキャッシュ
         `/api/menu/today?date=${todayDate}&district=${selectedSchool}`,
-        `/api/menu/today?date=${todayDate}&district=${newSchool}`,
         `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${selectedSchool}`,
-        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+        // 新地区のキャッシュ  
+        `/api/menu/today?date=${todayDate}&district=${newSchool}`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`,
+        // 念のため、undefinedの場合も
+        `/api/menu/today?date=${todayDate}&district=undefined`,
+        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=undefined`
       ]
       
-      // キャッシュを完全にクリア
-      cacheKeysToRemove.forEach(key => {
+      // すべてのキャッシュをクリア
+      allCacheKeys.forEach(key => {
         mutate(key, undefined, { revalidate: false })
       })
       
-      // 小さな遅延後に新しいデータを取得（Reactの状態更新を待つ）
+      console.log('[District Change] Cleared caches:', allCacheKeys)
+      
+      // 少し長めの遅延後に新しいデータを取得（React Hook更新を確実に待つ）
       setTimeout(() => {
         const newTodayApiUrl = `/api/menu/today?date=${todayDate}&district=${newSchool}`
         const newMonthlyApiUrl = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
         
         // 新しい地区のデータを強制取得
-        mutate(newTodayApiUrl, undefined, { revalidate: true })
-        mutate(newMonthlyApiUrl, undefined, { revalidate: true })
+        console.log('[District Change] Force fetching new data:', { newTodayApiUrl, newMonthlyApiUrl })
         
-        console.log('[District Change] Cache refreshed after delay:', {
-          oldSchool: selectedSchool,
-          newSchool,
-          clearedKeys: cacheKeysToRemove,
-          refreshedUrls: [newTodayApiUrl, newMonthlyApiUrl]
-        })
-      }, 100) // 100ms delay
+        mutate(newTodayApiUrl, undefined, { revalidate: true })
+          .then(data => console.log('[District Change] Today data fetched:', !!data))
+          .catch(error => console.error('[District Change] Today fetch error:', error))
+          
+        mutate(newMonthlyApiUrl, undefined, { revalidate: true })
+          .then(data => console.log('[District Change] Monthly data fetched:', !!data))
+          .catch(error => console.error('[District Change] Monthly fetch error:', error))
+          
+      }, 300) // 300ms delay
       
       // 月末のみ翌月データをプリフェッチ
       prefetchNextMonthIfNeeded(newSchool)
-    } else {
-      updateSchool(newSchool)
     }
   }
 
