@@ -279,6 +279,7 @@ export function useOnlineStatus() {
 // 🔄 統合フック（最適化版）
 export function useKawasakiMenuApp() {
   const { selectedSchool, updateSchool, isLoaded } = useSchoolSelection()
+  const { mutate } = useSWRConfig()
   const currentDate = new Date()
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth() + 1
@@ -294,9 +295,30 @@ export function useKawasakiMenuApp() {
 
   const handleSchoolChange = newSchool => {
     updateSchool(newSchool)
-    // 月末のみ翌月データをプリフェッチ
+    
+    // 地区切り替え時に関連するSWRキャッシュを強制リフレッシュ
     if (isOnline) {
+      // 今日のメニューキャッシュをクリア&リフレッシュ
+      const todayDate = getTodayJST()
+      const todayApiUrl = `/api/menu/today?date=${todayDate}&district=${newSchool}`
+      mutate(todayApiUrl, undefined, { revalidate: true })
+      
+      // 月間メニューキャッシュをクリア&リフレッシュ  
+      let targetMonth = currentMonth
+      if (currentMonth === 8 && currentYear === 2025) {
+        targetMonth = 9
+      }
+      const monthlyApiUrl = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
+      mutate(monthlyApiUrl, undefined, { revalidate: true })
+      
+      // 月末のみ翌月データをプリフェッチ
       prefetchNextMonthIfNeeded(newSchool)
+      
+      console.log('[District Change] Cache refreshed for:', { 
+        newSchool, 
+        todayApiUrl, 
+        monthlyApiUrl 
+      })
     }
   }
 
