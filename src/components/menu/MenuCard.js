@@ -223,19 +223,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
     >
       {/* ヘッダー部分 */}
       <div className="relative p-6 pb-4 flex-grow">
-        {/* 今日のバッジ - 高コントラスト */}
-        {isToday && (
-          <div className="absolute top-4 left-4">
-            <div
-              className="bg-solarized-yellow text-solarized-base3 px-4 py-2 rounded-full text-sm font-bold flex items-center shadow-lg border-2 border-solarized-yellow"
-              role="status"
-              aria-label="本日の給食"
-            >
-              <Sparkles className="w-4 h-4 mr-2" aria-hidden="true" />
-              <span>今日の給食</span>
-            </div>
-          </div>
-        )}
+
 
         {/* 特別メニューバッジ - 高コントラスト */}
         {isSpecial && (
@@ -253,7 +241,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
 
         {/* 日付・曜日表示（一体化） - 高コントラスト・アクセシブル */}
         <div
-          className={`flex items-center mb-6 ${isToday || isSpecial ? 'mt-12' : ''}`}
+          className={`flex items-center mb-6 ${isSpecial ? 'mt-12' : ''}`}
         >
           <div
             className={`
@@ -262,7 +250,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
                   ? 'bg-solarized-green border-solarized-green'
                   : 'bg-solarized-blue border-solarized-blue'
               } 
-              text-solarized-base3 rounded-xl px-6 py-4 shadow-lg border-2 flex items-center space-x-4
+              text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
             `}
             role="img"
             aria-label={`${month}月${day}日 ${menu.dayOfWeek}曜日`}

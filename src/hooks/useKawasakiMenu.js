@@ -3,7 +3,11 @@ import useSWR, { useSWRConfig } from 'swr'
 import { swrConfig } from '../lib/swr-config'
 import { getTodayJST } from '../lib/validation'
 
-// 🏫 学校選択管理
+/**
+ * 🏫 学校選択管理
+ * LocalStorageを使用して選択された学校地区を管理するhook
+ * @returns {Object} selectedSchool, updateSchool, isLoaded
+ */
 export function useSchoolSelection() {
   const [selectedSchool, setSelectedSchool] = useState('A')
   const [isLoaded, setIsLoaded] = useState(false)
@@ -28,7 +32,13 @@ export function useSchoolSelection() {
   return { selectedSchool, updateSchool, isLoaded }
 }
 
-// 📅 今日の献立取得（月1回更新最適化版）
+/**
+ * 📅 今日の献立取得（月1回更新最適化版）
+ * 指定された地区の今日の献立データを取得
+ * @param {string} district - 地区 (A, B, C)
+ * @param {string|null} date - 取得する日付 (null の場合は無効化)
+ * @returns {Object} menu, loading, error, refresh, hasData, isEmpty, lastUpdated, nextCheck
+ */
 export const useTodayMenu = (district = 'A', date) => {
   const targetDate = date || getTodayJST()
   // dateがnullの場合のみSWRを無効化（undefinedは有効）
@@ -36,17 +46,6 @@ export const useTodayMenu = (district = 'A', date) => {
   
   // より確実なSWRキー生成
   const swrKey = apiUrl && district ? apiUrl : null
-
-  // デバッグログ追加
-  console.log('[useTodayMenu] Debug:', {
-    originalDate: date,
-    targetDate,
-    district,
-    apiUrl,
-    swrKey,
-    dateIsNull: date === null,
-    dateIsUndefined: date === undefined
-  })
 
   const { data, error, isLoading, mutate } = useSWR(swrKey, swrConfig.fetcher, {
     refreshInterval: 0,
@@ -59,32 +58,8 @@ export const useTodayMenu = (district = 'A', date) => {
     dedupingInterval: 30 * 60 * 1000
   })
 
-  // SWR状態デバッグログ
-  console.log('[useTodayMenu] SWR State:', {
-    apiUrl,
-    data: !!data,
-    error: error?.message || null,
-    isLoading,
-    dataDetails: data ? {
-      success: data.success,
-      hasData: !!data.data,
-      dataType: typeof data.data
-    } : null
-  })
-
   // APIレスポンス形式を正規化（{success: true, data: {...}} -> {...}）
   const normalizedData = data?.success ? data.data : data
-
-  console.log('[useTodayMenu] Data Normalization:', {
-    rawData: !!data,
-    normalizedData: !!normalizedData,
-    isApiFormat: data?.success,
-    finalResult: {
-      menu: normalizedData,
-      loading: isLoading,
-      hasData: !!normalizedData
-    }
-  })
 
   return {
     menu: normalizedData,
@@ -99,7 +74,14 @@ export const useTodayMenu = (district = 'A', date) => {
   }
 }
 
-// 📊 月間献立取得（月1回更新最適化版）
+/**
+ * 📊 月間献立取得（月1回更新最適化版）
+ * 指定された年月・地区の月間献立データを取得・加工
+ * @param {number} year - 年
+ * @param {number} month - 月
+ * @param {string} district - 地区 (A, B, C)
+ * @returns {Object} menus, loading, error, refresh, calendarData, getMenuByDate, hasMenuOnDate, metadata, totalMenuDays, specialMenuCount, lastUpdated, nextCheck
+ */
 export const useMonthlyMenus = (year, month, district = 'A') => {
   const currentDate = new Date()
   const targetYear = year || currentDate.getFullYear()
@@ -191,7 +173,12 @@ export const useMonthlyMenus = (year, month, district = 'A') => {
   }
 }
 
-// 🧠 スマートな更新間隔計算
+/**
+ * 🧠 スマートな更新間隔計算
+ * 月末・月初は頻繁に、月中は低頻度で更新間隔を計算
+ * @param {string} type - 'daily' または 'monthly'
+ * @returns {number} 更新間隔（ミリ秒）
+ */
 function getSmartRefreshInterval(type) {
   const now = new Date()
   const dayOfMonth = now.getDate()
@@ -219,14 +206,23 @@ function getSmartRefreshInterval(type) {
   return 24 * 60 * 60 * 1000 // デフォルト24時間
 }
 
-// ⏰ 次回チェック時刻の計算
+/**
+ * ⏰ 次回チェック時刻の計算
+ * 指定されたタイプに応じて次回チェック時刻を計算
+ * @param {string} type - 'daily' または 'monthly'
+ * @returns {Date} 次回チェック時刻
+ */
 function getNextCheckTime(type) {
   const now = new Date()
   const interval = getSmartRefreshInterval(type)
   return new Date(now.getTime() + interval)
 }
 
-// 🚀 プリフェッチ機能（最適化版）
+/**
+ * 🚀 プリフェッチ機能（最適化版）
+ * 月末に翌月データをプリフェッチし、手動プリフェッチ機能を提供
+ * @returns {Object} prefetchNextMonthIfNeeded, manualPrefetch
+ */
 export function useMenuPrefetch() {
   const { mutate } = useSWRConfig()
 
@@ -259,7 +255,11 @@ export function useMenuPrefetch() {
   }
 }
 
-// 📱 オンライン状態検知
+/**
+ * 📱 オンライン状態検知
+ * ブラウザのオンライン状態を監視
+ * @returns {boolean} オンライン状態
+ */
 export function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(true)
 
@@ -280,7 +280,11 @@ export function useOnlineStatus() {
   return isOnline
 }
 
-// 🔄 統合フック（最適化版）
+/**
+ * 🔄 統合フック（最適化版）
+ * アプリ全体で使用する川崎給食データとUI状態を統合管理
+ * @returns {Object} selectedSchool, updateSchool, isSchoolLoaded, todayMenu, monthlyMenus, isOnline, isAppReady, isLoading, hasError, lastUpdate, nextCheck
+ */
 export function useKawasakiMenuApp() {
   const { selectedSchool, updateSchool, isLoaded } = useSchoolSelection()
   const { mutate } = useSWRConfig()
@@ -316,7 +320,7 @@ export function useKawasakiMenuApp() {
   }, [pendingSchool, selectedSchool])
 
   const handleSchoolChange = newSchool => {
-    console.log('[handleSchoolChange] Starting district change:', { oldSchool: selectedSchool, newSchool, activeSchool })
+
     
     // 即座にpendingSchoolを設定（これによりSWRフックが新しい地区で動作開始）
     setPendingSchool(newSchool)
@@ -337,7 +341,7 @@ export function useKawasakiMenuApp() {
         `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
       ]
       
-      console.log('[District Change] Clearing SWR cache:', cacheKeysToRemove)
+
       
       // キャッシュをクリア（データは残さない）
       cacheKeysToRemove.forEach(key => {
@@ -349,26 +353,17 @@ export function useKawasakiMenuApp() {
         const newTodayKey = `/api/menu/today?date=${todayDate}&district=${newSchool}`
         const newMonthlyKey = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
         
-        console.log('[District Change] Force revalidating:', { newTodayKey, newMonthlyKey })
+
         
         mutate(newTodayKey, undefined, { revalidate: true })
         mutate(newMonthlyKey, undefined, { revalidate: true })
       }, 50)
     }
     
-    console.log('[District Change] Completed using pendingSchool + cache clear')
+
   }
 
-  // 月末のプリフェッチ（アプリ起動時）- 削除（10秒後のリクエスト防止）
-  // useEffect(() => {
-  //   if (isLoaded && isOnline && selectedSchool) {
-  //     const timer = setTimeout(() => {
-  //       prefetchNextMonthIfNeeded(selectedSchool)
-  //     }, 10000) // 10秒後に実行
-  //     return () => clearTimeout(timer)
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isLoaded, isOnline, selectedSchool]) // prefetchNextMonthIfNeeded を依存から除外
+
 
   return {
     selectedSchool: activeSchool,
