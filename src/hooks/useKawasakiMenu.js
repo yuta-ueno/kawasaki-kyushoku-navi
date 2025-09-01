@@ -284,70 +284,44 @@ export function useKawasakiMenuApp() {
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth() + 1
 
-  const todayMenu = useTodayMenu(selectedSchool)
+  // 地区切り替え用の一時的な状態を追加
+  const [pendingSchool, setPendingSchool] = useState(null)
+  const activeSchool = pendingSchool || selectedSchool
+
+  const todayMenu = useTodayMenu(activeSchool)
   const monthlyMenus = useMonthlyMenus(
     currentYear,
     currentMonth,
-    selectedSchool
+    activeSchool
   )
   const { prefetchNextMonthIfNeeded } = useMenuPrefetch()
   const isOnline = useOnlineStatus()
 
-  const handleSchoolChange = newSchool => {
-    console.log('[handleSchoolChange] Starting district change:', { oldSchool: selectedSchool, newSchool })
-    
-    // まず地区を更新（これによりSWRフックのキーが変更される）
-    updateSchool(newSchool)
-    
-    // 地区切り替え時に関連するSWRキャッシュを強制リフレッシュ
-    if (isOnline) {
-      const todayDate = getTodayJST()
-      let targetMonth = currentMonth
-      if (currentMonth === 8 && currentYear === 2025) {
-        targetMonth = 9
-      }
-      
-      // すべてのメニュー関連キャッシュを一括クリア
-      const allCacheKeys = [
-        // 旧地区のキャッシュ
-        `/api/menu/today?date=${todayDate}&district=${selectedSchool}`,
-        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${selectedSchool}`,
-        // 新地区のキャッシュ  
-        `/api/menu/today?date=${todayDate}&district=${newSchool}`,
-        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`,
-        // 念のため、undefinedの場合も
-        `/api/menu/today?date=${todayDate}&district=undefined`,
-        `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=undefined`
-      ]
-      
-      // すべてのキャッシュをクリア
-      allCacheKeys.forEach(key => {
-        mutate(key, undefined, { revalidate: false })
-      })
-      
-      console.log('[District Change] Cleared caches:', allCacheKeys)
-      
-      // 少し長めの遅延後に新しいデータを取得（React Hook更新を確実に待つ）
-      setTimeout(() => {
-        const newTodayApiUrl = `/api/menu/today?date=${todayDate}&district=${newSchool}`
-        const newMonthlyApiUrl = `/api/menu/monthly?year=${currentYear}&month=${targetMonth}&district=${newSchool}`
-        
-        // 新しい地区のデータを強制取得
-        console.log('[District Change] Force fetching new data:', { newTodayApiUrl, newMonthlyApiUrl })
-        
-        mutate(newTodayApiUrl, undefined, { revalidate: true })
-          .then(data => console.log('[District Change] Today data fetched:', !!data))
-          .catch(error => console.error('[District Change] Today fetch error:', error))
-          
-        mutate(newMonthlyApiUrl, undefined, { revalidate: true })
-          .then(data => console.log('[District Change] Monthly data fetched:', !!data))
-          .catch(error => console.error('[District Change] Monthly fetch error:', error))
-          
-      }, 300) // 300ms delay
-      
-      // 月末のみ翌月データをプリフェッチ
-      prefetchNextMonthIfNeeded(newSchool)
+  // pendingSchoolが設定されたら、実際の状態更新を行う
+  useEffect(() => {
+    if (pendingSchool && pendingSchool !== selectedSchool) {
+      updateSchool(pendingSchool)
     }
+  }, [pendingSchool, selectedSchool, updateSchool])
+
+  // selectedSchoolが更新されたら、pendingをクリア
+  useEffect(() => {
+    if (pendingSchool && pendingSchool === selectedSchool) {
+      setPendingSchool(null)
+    }
+  }, [pendingSchool, selectedSchool])
+
+  const handleSchoolChange = newSchool => {
+    console.log('[handleSchoolChange] Starting district change:', { oldSchool: selectedSchool, newSchool, activeSchool })
+    
+    // 即座にpendingSchoolを設定（これによりSWRフックが新しい地区で動作開始）
+    setPendingSchool(newSchool)
+    
+    
+    console.log('[District Change] Immediate district change using pendingSchool:', { newSchool, activeSchool: newSchool })
+    
+    // pendingSchoolによってSWRフックが即座に新しい地区でデータ取得を開始
+    // 追加のキャッシュ操作は不要（React Hookの自然な動作に任せる）
   }
 
   // 月末のプリフェッチ（アプリ起動時）- 削除（10秒後のリクエスト防止）
@@ -362,7 +336,7 @@ export function useKawasakiMenuApp() {
   // }, [isLoaded, isOnline, selectedSchool]) // prefetchNextMonthIfNeeded を依存から除外
 
   return {
-    selectedSchool,
+    selectedSchool: activeSchool,
     updateSchool: handleSchoolChange,
     isSchoolLoaded: isLoaded,
     todayMenu,
