@@ -130,20 +130,25 @@ const FeedbackModal = ({ isOpen, onClose, selectedDistrict }) => {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               評価をお聞かせください
             </label>
-            <div className="flex justify-center space-x-2">
+            <div className="flex justify-center space-x-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
                   disabled={isSubmitting}
-                  className={`text-3xl transition-colors duration-200 disabled:opacity-50 ${
+                  className={`p-1 transition-all duration-200 disabled:opacity-50 hover:scale-110 ${
                     star <= rating 
-                      ? 'text-solarized-yellow hover:text-solarized-orange' 
+                      ? 'text-solarized-yellow' 
                       : 'text-gray-300 hover:text-solarized-yellow'
                   }`}
                 >
-                  ⭐
+                  <Star 
+                    className="w-8 h-8" 
+                    fill={star <= rating ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  />
                 </button>
               ))}
             </div>
