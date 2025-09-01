@@ -31,8 +31,11 @@ export function useSchoolSelection() {
 // 📅 今日の献立取得（月1回更新最適化版）
 export const useTodayMenu = (district = 'A', date) => {
   const targetDate = date || getTodayJST()
-  // dateがnullの場合はSWRを無効化（月間データ表示時の不要なリクエスト防止）
+  // dateがnullの場合のみSWRを無効化（undefinedは有効）
   const apiUrl = date !== null ? `/api/menu/today?date=${targetDate}&district=${district}` : null
+  
+  // より確実なSWRキー生成
+  const swrKey = apiUrl && district ? apiUrl : null
 
   // デバッグログ追加
   console.log('[useTodayMenu] Debug:', {
@@ -40,11 +43,12 @@ export const useTodayMenu = (district = 'A', date) => {
     targetDate,
     district,
     apiUrl,
+    swrKey,
     dateIsNull: date === null,
     dateIsUndefined: date === undefined
   })
 
-  const { data, error, isLoading, mutate } = useSWR(apiUrl, swrConfig.fetcher, {
+  const { data, error, isLoading, mutate } = useSWR(swrKey, swrConfig.fetcher, {
     refreshInterval: 0,
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
