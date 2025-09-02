@@ -160,10 +160,10 @@ export function setCommonHeaders(res, options = {}) {
     endpoint = 'unknown'
   } = options
 
-  // キャッシュヘッダー
+  // キャッシュヘッダー（Firestore専用キャッシュ戦略のため無効化）
   res.setHeader(
     'Cache-Control',
-    `public, s-maxage=${cacheMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`
+    'no-cache, no-store, must-revalidate'
   )
   
   // CORS

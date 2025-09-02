@@ -7,17 +7,9 @@ import LINEWebViewDetector from '../components/webview/LINEWebViewDetector'
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
-    // Service Worker を登録
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('SW registered: ', registration)
-        })
-        .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError)
-        })
-    }
+    // Service Worker を無効化（キャッシュ問題を回避）
+    // Firestore データキャッシュのみを使用する戦略のため無効化
+    console.log('Service Worker registration disabled to avoid cache conflicts')
   }, [])
 
   return (

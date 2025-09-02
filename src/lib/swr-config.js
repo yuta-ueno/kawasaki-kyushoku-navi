@@ -29,11 +29,16 @@ const fetcher = async url => {
 export const swrConfig = {
   fetcher,
 
-  // キャッシュとリフレッシュ設定
-  refreshInterval: 0, // 自動更新は個別に設定
-  revalidateOnFocus: true, // ユーザーがアプリに戻った時のみ更新
-  revalidateOnReconnect: true, // ネットワーク再接続時に更新
-  revalidateIfStale: false, // 古いデータを許容（月1更新のため）
+  // キャッシュとリフレッシュ設定（Firestore専用キャッシュ戦略）
+  refreshInterval: 0, // 自動更新無効
+  revalidateOnFocus: true, // フォーカス時は更新（ユーザビリティ向上）
+  revalidateOnReconnect: true, // 再接続時は更新
+  revalidateIfStale: true, // 常に最新データを取得
+  
+  // キャッシュ無効化設定
+  provider: () => new Map(), // メモリキャッシュを無効化
+  
+  // 古いデータを許容（月1更新のため）
 
   // パフォーマンス設定（給食アプリ用に最適化）
   dedupingInterval: 0, // 重複防止を無効化（デバッグ用）
