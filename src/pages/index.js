@@ -168,12 +168,17 @@ export default function HomePage() {
           {/* 今日の給食セクション */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold text-solarized-base02 mb-4">
-              今日の川崎市小学校給食献立
+              今日・明日の川崎市小学校給食献立
             </h2>
 
-            {/* 新しいMenuCardコンポーネントを使用（内部でSWRフックを呼び出し） */}
-            <div className="max-w-2xl">
-              <MenuCard isToday={true} selectedSchool={app.selectedSchool} />
+            {/* 今日と明日の2日分の献立を表示 */}
+            <div className="grid gap-6 max-w-4xl">
+              <div>
+                <MenuCard isToday={true} selectedSchool={app.selectedSchool} />
+              </div>
+              <div>
+                <MenuCard isToday={false} isTomorrow={true} selectedSchool={app.selectedSchool} />
+              </div>
             </div>
           </section>
 

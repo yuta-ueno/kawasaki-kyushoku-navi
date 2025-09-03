@@ -33,7 +33,8 @@
       "mcp__serena__create_text_file",
       "Bash(firebase emulators:start:*)",
       "Bash(dir:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

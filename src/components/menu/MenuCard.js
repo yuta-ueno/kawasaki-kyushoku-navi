@@ -30,16 +30,28 @@ const getDayColor = dayOfWeek => {
   )
 }
 
-const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool = null }) => {
+const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = null, selectedSchool = null }) => {
   // selectedSchoolが渡されない場合のフォールバック
   const { selectedSchool: fallbackSchool } = useSchoolSelection()
   const activeSchool = selectedSchool || fallbackSchool
   
   // menuDataが渡されている場合はSWRフックを呼び出さない
   const shouldFetch = !menuData
+  
+  // 明日の日付を計算
+  const targetDate = useMemo(() => {
+    if (debugDate) return debugDate
+    if (isTomorrow) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      return tomorrow.toISOString().split('T')[0] // YYYY-MM-DD形式
+    }
+    return undefined // 今日の日付（デフォルト）
+  }, [debugDate, isTomorrow])
+  
   const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
     activeSchool,
-    shouldFetch ? (debugDate || undefined) : null // undefinedでも今日の日付が使用される
+    shouldFetch ? targetDate : null
   )
 
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
@@ -247,8 +259,8 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
             className={`
               ${
                 isToday
-                  ? 'bg-solarized-red border-solarized-red'
-                  : 'bg-solarized-blue border-solarized-blue'
+                  ? 'bg-solarized-green border-solarized-green'
+                  : 'bg-solarized-green border-solarized-green'
               } 
               text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
             `}
@@ -309,13 +321,8 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
               role="region"
               aria-labelledby="learning-point-title"
             >
-              <div className="flex items-start space-x-3">
-                <div
-                  className="w-6 h-6 bg-solarized-base1 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
-                  aria-hidden="true"
-                >
-                  <Info className="w-4 h-4 text-solarized-blue" />
-                </div>
+              <div className="flex items-center space-x-3">
+                <Info className="w-4 h-4 text-solarized-blue flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm text-solarized-blue leading-normal">
                     {menu.notes}

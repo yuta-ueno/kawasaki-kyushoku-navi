@@ -19,20 +19,34 @@ if (process.env.UPSTASH_REDIS_REST_TOKEN) {
 }
 
 console.log('Node ENV:', process.env.NODE_ENV);
+console.log('Redis is disabled for local development');
 console.log('=====================================');
 
 // =============================================================================
 // Redisクライアントの初期化
 // =============================================================================
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+let redis = null;
+
+// Redis設定が無効な場合はnullのままにして、フォールバック処理を行う
+if (process.env.UPSTASH_REDIS_REST_URL && 
+    process.env.UPSTASH_REDIS_REST_TOKEN &&
+    process.env.UPSTASH_REDIS_REST_URL.startsWith('https://') &&
+    process.env.UPSTASH_REDIS_REST_URL !== 'disabled-for-demo') {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
 
 // =============================================================================
 // 接続テスト用関数
 // =============================================================================
 export async function testRedisConnection() {
+  if (!redis) {
+    console.log('Redis is disabled - returning false');
+    return false;
+  }
+  
   try {
     console.log('Testing Redis connection...');
     await redis.set('test', 'connection-ok');
@@ -42,12 +56,6 @@ export async function testRedisConnection() {
     return result === 'connection-ok';
   } catch (error) {
     console.error('Redis connection test failed:', error);
-    console.error('Error details:', {
-      name: error.name,
-      message: error.message,
-      cause: error.cause,
-      stack: error.stack?.split('\n').slice(0, 3)
-    });
     return false;
   }
 }
@@ -56,6 +64,11 @@ export async function testRedisConnection() {
 // パフォーマンス監視用
 // =============================================================================
 export async function getRedisInfo() {
+  if (!redis) {
+    console.log('Redis is disabled - no info available');
+    return null;
+  }
+  
   try {
     const info = await redis.info();
     return info;
@@ -69,6 +82,11 @@ export async function getRedisInfo() {
 // レート制限専用関数（デバッグ付き）
 // =============================================================================
 export async function rateLimitIncrement(key, window = 60) {
+  if (!redis) {
+    console.log('Redis is disabled - allowing request (returning 1)');
+    return 1; // Redisが無効な場合は常に許可
+  }
+  
   try {
     console.log('=== Rate Limit Debug ===');
     console.log('Key:', key);
@@ -95,11 +113,10 @@ export async function rateLimitIncrement(key, window = 60) {
     
     if (Array.isArray(results[0]) && results[0].length >= 2) {
       // 標準的なRedis client構造: [[error, result], [error, result]]
-      const [incrResult, expireResult] = results;
       console.log('Standard Redis format detected');
-      console.log('Increment result:', incrResult);
-      console.log('Expire result:', expireResult);
-      count = incrResult[1];
+      console.log('Increment result:', results[0]);
+      console.log('Expire result:', results[1]);
+      count = results[0][1];
     } else {
       // Upstash Redis構造: [result, result]
       console.log('Upstash Redis format detected');
@@ -130,4 +147,5 @@ export async function rateLimitIncrement(key, window = 60) {
   }
 }
 
+// デフォルトエクスポート（nullの場合もあり）
 export default redis;
