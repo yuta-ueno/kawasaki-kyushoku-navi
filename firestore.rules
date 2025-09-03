@@ -1,10 +1,22 @@
 rules_version = "2";
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 既存のメニューデータは読み取り専用
+    // メニューデータ - 読み取り専用
     match /kawasaki_menus/{document} {
       allow read: if true;
-      allow write: if false;
+      allow write: if false; // セキュリティのため書き込み禁止
+    }
+    
+    // メタデータ - 読み取り専用
+    match /kawasaki_menu_metadata/{document} {
+      allow read: if true;
+      allow write: if false; // セキュリティのため書き込み禁止
+    }
+    
+    // 学校マスタ - 読み取り専用
+    match /kawasaki_schools/{document} {
+      allow read: if true;
+      allow write: if false; // セキュリティのため書き込み禁止
     }
     
     // フィードバックコレクションは書き込み許可

@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -10,8 +10,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Firebase初期化
-const app = initializeApp(firebaseConfig);
+// Firebase初期化（重複チェック付き）
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Firestore初期化
 export const db = getFirestore(app);

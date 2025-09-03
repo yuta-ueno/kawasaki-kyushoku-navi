@@ -18,14 +18,14 @@
         "average": 27.46
       }
     },
-    "createdAt": "2025-08-24T08:37:56Z",
+    "createdAt": "2025-09-03T01:21:48Z",
     "source": "川崎市教育委員会 給食献立表 R7-09syou.xlsx",
     "dataVersion": "4.0",
     "includedNutrition": [
       "energy",
       "protein"
     ],
-    "note": "各地区は同一献立を異なる日程で提供／9月は行事食なし"
+    "note": "各地区は同一献立を異なる日程で提供／9月は行事食なし／notesに学習ポイントを格納"
   },
   "menus": [
     {
@@ -47,7 +47,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "片栗粉について知る"
     },
     {
       "date": "2025-09-02",
@@ -69,7 +69,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "トマトについて知る"
     },
     {
       "date": "2025-09-03",
@@ -91,7 +91,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "◎大豆ミートについて知る"
     },
     {
       "date": "2025-09-04",
@@ -114,7 +114,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のズッキーニについて知る"
     },
     {
       "date": "2025-09-05",
@@ -136,7 +136,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "ハンバーグについて知る"
     },
     {
       "date": "2025-09-08",
@@ -159,7 +159,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "◎保存食について知る"
     },
     {
       "date": "2025-09-09",
@@ -180,7 +180,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "マッシュルームについて知る"
     },
     {
       "date": "2025-09-10",
@@ -203,7 +203,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品の梨について知る"
     },
     {
       "date": "2025-09-11",
@@ -226,7 +226,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "新献立の韓国風肉じゃがについて知る"
     },
     {
       "date": "2025-09-12",
@@ -248,7 +248,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "カレーサンドパンについて知る"
     },
     {
       "date": "2025-09-16",
@@ -269,7 +269,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のピーマンについて知る"
     },
     {
       "date": "2025-09-17",
@@ -292,7 +292,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "◎地域でとれる果物を知る"
     },
     {
       "date": "2025-09-18",
@@ -314,7 +314,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "まぐろについて知る"
     },
     {
       "date": "2025-09-19",
@@ -336,7 +336,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "高野豆腐について知る"
     },
     {
       "date": "2025-09-22",
@@ -359,7 +359,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のチンゲン菜について知る"
     },
     {
       "date": "2025-09-24",
@@ -381,7 +381,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のとうがんについて知る"
     },
     {
       "date": "2025-09-25",
@@ -404,7 +404,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のかぼちゃについて知る"
     },
     {
       "date": "2025-09-26",
@@ -427,7 +427,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "おかかについて知る"
     },
     {
       "date": "2025-09-29",
@@ -450,7 +450,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "磯辺揚げについて知る"
     },
     {
       "date": "2025-09-30",
@@ -472,7 +472,7 @@
         "proteinUnit": "g"
       },
       "hasSpecialMenu": false,
-      "notes": ""
+      "notes": "季節の食品のさやいんげんについて知る"
     }
   ]
 }

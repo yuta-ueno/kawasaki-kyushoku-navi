@@ -68,10 +68,13 @@ export const importKawasakiMenuData = async (menuData) => {
       await batch.commit();
       console.log('Firestoreバッチ書き込み完了');
     } catch (batchError) {
-      console.error('バッチ書き込みエラー:', {
-        message: batchError.message,
-        code: batchError.code,
-        stack: batchError.stack
+      console.error('バッチ書き込みエラー:', batchError);
+      console.error('詳細:', {
+        message: batchError?.message || 'メッセージなし',
+        code: batchError?.code || 'コードなし',
+        name: batchError?.name || '名前なし',
+        stack: batchError?.stack || 'スタックなし',
+        fullError: JSON.stringify(batchError, null, 2)
       });
       throw batchError;
     }
@@ -89,11 +92,14 @@ export const importKawasakiMenuData = async (menuData) => {
     };
     
   } catch (error) {
-    console.error('❌ インポートエラー詳細:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack,
-      name: error.name
+    console.error('❌ インポートエラー詳細:', error);
+    console.error('エラー解析:', {
+      message: error?.message || 'メッセージなし',
+      code: error?.code || 'コードなし',
+      name: error?.name || '名前なし',
+      stack: error?.stack || 'スタックなし',
+      isFirebaseError: error?.name === 'FirebaseError',
+      fullError: JSON.stringify(error, null, 2)
     });
     return { 
       success: false, 

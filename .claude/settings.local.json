@@ -30,7 +30,10 @@
       "mcp__serena__get_symbols_overview",
       "mcp__serena__think_about_task_adherence",
       "mcp__serena__insert_after_symbol",
-      "mcp__serena__create_text_file"
+      "mcp__serena__create_text_file",
+      "Bash(firebase emulators:start:*)",
+      "Bash(dir:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []
