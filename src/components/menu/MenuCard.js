@@ -241,7 +241,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
 
         {/* 日付・曜日表示（一体化） - 高コントラスト・アクセシブル */}
         <div
-          className={`flex items-center mb-6 ${isSpecial ? 'mt-12' : ''}`}
+          className={`flex items-center mb-3 ${isSpecial ? 'mt-6' : ''}`}
         >
           <div
             className={`
@@ -263,8 +263,8 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
         </div>
 
         {/* メニュー内容 - アクセシブルな構造 */}
-        <div className="mb-4">
-          <div className="flex items-center mb-4">
+        <div className="mb-2">
+          <div className="flex items-center mb-2">
             <ChefHat
               className="w-5 h-5 text-solarized-base01 mr-3"
               aria-hidden="true"
@@ -274,7 +274,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
             </h3>
           </div>
 
-          <ul className="space-y-3" role="list">
+          <ul className="space-y-1.5" role="list">
             {menuItems.map((item, index) => (
               <li
                 key={index}
@@ -285,7 +285,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
                   className="w-3 h-3 bg-solarized-blue rounded-full mr-4 flex-shrink-0 mt-2"
                   aria-hidden="true"
                 ></div>
-                <span className="leading-relaxed font-bold">{item}</span>
+                <span className="leading-normal font-bold">{item}</span>
               </li>
             ))}
 
@@ -298,14 +298,14 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
                 className="w-3 h-3 bg-solarized-blue rounded-full mr-4 flex-shrink-0 mt-2"
                 aria-hidden="true"
               ></div>
-              <span className="leading-relaxed font-bold">ぎゅうにゅう</span>
+              <span className="leading-normal font-bold">ぎゅうにゅう</span>
             </li>
           </ul>
 
           {/* 学習ポイント（notes）の表示 - アクセシブル */}
           {menu.notes && (
             <div
-              className="mt-6 p-4 bg-solarized-base2 rounded-lg border-2 border-solarized-base1"
+              className="mt-3 p-3 bg-solarized-base2 rounded-lg border-2 border-solarized-base1"
               role="region"
               aria-labelledby="learning-point-title"
             >
@@ -319,11 +319,11 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
                 <div className="flex-1">
                   <h4
                     id="learning-point-title"
-                    className="text-sm font-bold text-solarized-blue mb-2"
+                    className="text-sm font-bold text-solarized-blue mb-1"
                   >
                     今日の学習ポイント
                   </h4>
-                  <p className="text-sm text-solarized-blue leading-relaxed">
+                  <p className="text-sm text-solarized-blue leading-normal">
                     {menu.notes}
                   </p>
                 </div>
