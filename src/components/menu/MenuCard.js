@@ -219,11 +219,9 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
     <article
       className={`
         ${
-          isToday
-            ? 'bg-gradient-to-br from-solarized-base3 to-solarized-base3 border-solarized-yellow'
-            : menu.dayOfWeek === '土' || menu.dayOfWeek === '日'
-              ? 'bg-solarized-base3 border-solarized-yellow'
-              : 'bg-solarized-base3 border-solarized-base1'
+          menu.dayOfWeek === '土' || menu.dayOfWeek === '日'
+            ? 'bg-solarized-base3 border-solarized-yellow'
+            : 'bg-solarized-base3 border-solarized-base1'
         }
         rounded-2xl shadow-md hover:shadow-lg 
         transition-all duration-300 transform hover:-translate-y-1 
@@ -265,8 +263,14 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
               text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
             `}
             role="img"
-            aria-label={`${month}月${day}日 ${menu.dayOfWeek}曜日`}
+            aria-label={`${isToday ? '今日 ' : isTomorrow ? '明日 ' : ''}${month}月${day}日 ${menu.dayOfWeek}曜日`}
           >
+            {/* 今日・明日のラベル */}
+            {(isToday || isTomorrow) && (
+              <div className="text-sm font-bold bg-solarized-base3 text-solarized-green px-3 py-1 rounded-lg border-2 border-solarized-green">
+                {isToday ? '今日' : '明日'}
+              </div>
+            )}
             <div className="text-center">
               <div className="text-2xl font-bold">{day}日</div>
             </div>

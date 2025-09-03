@@ -177,7 +177,11 @@ export default function HomePage() {
                 <MenuCard isToday={true} selectedSchool={app.selectedSchool} />
               </div>
               <div>
-                <MenuCard isToday={false} isTomorrow={true} selectedSchool={app.selectedSchool} />
+                <MenuCard
+                  isToday={false}
+                  isTomorrow={true}
+                  selectedSchool={app.selectedSchool}
+                />
               </div>
             </div>
           </section>
@@ -191,7 +195,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-solarized-base02">
-                    {currentYear}年{displayMonth}月の給食献立
+                    {currentYear}年{displayMonth}月の月間献立リスト
                   </h2>
                   <p className="text-solarized-base01">
                     川崎市{app.selectedSchool}地区小学校の献立表
