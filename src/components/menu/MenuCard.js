@@ -314,15 +314,9 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
                   className="w-6 h-6 bg-solarized-base1 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
                   aria-hidden="true"
                 >
-                  <span className="text-solarized-blue text-sm">📚</span>
+                  <Info className="w-4 h-4 text-solarized-blue" />
                 </div>
                 <div className="flex-1">
-                  <h4
-                    id="learning-point-title"
-                    className="text-sm font-bold text-solarized-blue mb-1"
-                  >
-                    今日の学習ポイント
-                  </h4>
                   <p className="text-sm text-solarized-blue leading-normal">
                     {menu.notes}
                   </p>
