@@ -247,7 +247,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
             className={`
               ${
                 isToday
-                  ? 'bg-solarized-green border-solarized-green'
+                  ? 'bg-solarized-blue border-solarized-blue'
                   : 'bg-solarized-blue border-solarized-blue'
               } 
               text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
