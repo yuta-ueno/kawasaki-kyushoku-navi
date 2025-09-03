@@ -263,7 +263,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
         </div>
 
         {/* メニュー内容 - アクセシブルな構造 */}
-        <div className="mb-2">
+        <div className="mb-3">
           <div className="flex items-center mb-2">
             <ChefHat
               className="w-5 h-5 text-solarized-base01 mr-3"
@@ -305,7 +305,7 @@ const MenuCard = ({ debugDate, isToday = false, menuData = null, selectedSchool 
           {/* 学習ポイント（notes）の表示 - アクセシブル */}
           {menu.notes && (
             <div
-              className="mt-3 p-3 bg-solarized-base2 rounded-lg border-2 border-solarized-base1"
+              className="mt-2 p-3 bg-solarized-base2 rounded-lg border-2 border-solarized-base1"
               role="region"
               aria-labelledby="learning-point-title"
             >
