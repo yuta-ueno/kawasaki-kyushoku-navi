@@ -167,8 +167,8 @@ export default function HomePage() {
 
           {/* 今日の給食セクション */}
           <section className="mb-12">
-            <h2 className="text-xl font-semibold text-solarized-base02 mb-4">
-              今日・明日の川崎市小学校給食献立
+            <h2 className="text-2xl font-bold text-solarized-base02 mb-4">
+              きょう・あすの小学校給食献立
             </h2>
 
             {/* 今日と明日の2日分の献立を表示 */}
@@ -195,11 +195,8 @@ export default function HomePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-solarized-base02">
-                    {currentYear}年{displayMonth}月の月間献立リスト
+                    {currentYear}年{displayMonth}月の月間献立
                   </h2>
-                  <p className="text-solarized-base01">
-                    川崎市{app.selectedSchool}地区小学校の献立表
-                  </p>
                 </div>
               </div>
             </div>

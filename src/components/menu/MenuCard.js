@@ -30,29 +30,45 @@ const getDayColor = dayOfWeek => {
   )
 }
 
-const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = null, selectedSchool = null }) => {
+const MenuCard = ({
+  debugDate,
+  isToday = false,
+  isTomorrow = false,
+  menuData = null,
+  selectedSchool = null,
+}) => {
   // selectedSchoolが渡されない場合のフォールバック
   const { selectedSchool: fallbackSchool } = useSchoolSelection()
   const activeSchool = selectedSchool || fallbackSchool
-  
+
   // menuDataが渡されている場合はSWRフックを呼び出さない
   const shouldFetch = !menuData
-  
-  // 明日の日付を計算
+
+  // 明日の日付を計算（JST対応）
   const targetDate = useMemo(() => {
     if (debugDate) return debugDate
     if (isTomorrow) {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      return tomorrow.toISOString().split('T')[0] // YYYY-MM-DD形式
+      // JSTで明日の日付を計算
+      const now = new Date()
+      const japanTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }))
+      japanTime.setDate(japanTime.getDate() + 1)
+      
+      const year = japanTime.getFullYear()
+      const month = String(japanTime.getMonth() + 1).padStart(2, '0')
+      const day = String(japanTime.getDate()).padStart(2, '0')
+      
+      return `${year}-${month}-${day}`
     }
     return undefined // 今日の日付（デフォルト）
   }, [debugDate, isTomorrow])
-  
-  const { menu: fetchedMenu, loading, error, refresh, isEmpty } = useTodayMenu(
-    activeSchool,
-    shouldFetch ? targetDate : null
-  )
+
+  const {
+    menu: fetchedMenu,
+    loading,
+    error,
+    refresh,
+    isEmpty,
+  } = useTodayMenu(activeSchool, shouldFetch ? targetDate : null)
 
   // 直接渡されたデータがある場合はそれを使用、なければAPIから取得したデータを使用
   const menu = menuData || fetchedMenu
@@ -61,12 +77,15 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
     if (!menu?.menu) return []
 
     if (Array.isArray(menu.menu.items)) {
-      return menu.menu.items.filter(item => 
-        item && item.trim() && item.trim() !== 'ぎゅうにゅう'
+      return menu.menu.items.filter(
+        item => item && item.trim() && item.trim() !== 'ぎゅうにゅう'
       )
     }
 
-    if (typeof menu.menu.description === 'string' && menu.menu.description.trim()) {
+    if (
+      typeof menu.menu.description === 'string' &&
+      menu.menu.description.trim()
+    ) {
       return menu.menu.description
         .split(/[\n\r\s　,、]+/)
         .filter(item => item.trim() && item.trim() !== 'ぎゅうにゅう')
@@ -104,11 +123,13 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
   // エラーの種類判定（簡素化）
   const errorKeywords = {
     notFound: ['404', '見つかりません', 'not found'],
-    rateLimit: ['429', 'Too Many Requests', '制限されています', 'Rate limit']
+    rateLimit: ['429', 'Too Many Requests', '制限されています', 'Rate limit'],
   }
-  
-  const isDataNotFound = error && errorKeywords.notFound.some(keyword => error.includes(keyword))
-  const isRateLimit = error && errorKeywords.rateLimit.some(keyword => error.includes(keyword))
+
+  const isDataNotFound =
+    error && errorKeywords.notFound.some(keyword => error.includes(keyword))
+  const isRateLimit =
+    error && errorKeywords.rateLimit.some(keyword => error.includes(keyword))
 
   if (!isUsingDirectData && isRateLimit) {
     return (
@@ -162,50 +183,127 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
   }
 
   if (!menu || (!isUsingDirectData && (isEmpty || isDataNotFound))) {
+    // 給食がない場合も日付表示のための情報を計算
+    const getNoMenuDateInfo = () => {
+      if (debugDate) {
+        const dateMatch = debugDate.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (dateMatch) {
+          const [, year, month, day] = dateMatch
+          const date = new Date(year, month - 1, day)
+          const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()]
+          return {
+            day: parseInt(day, 10),
+            month: parseInt(month, 10),
+            dayOfWeek
+          }
+        }
+      }
+      
+      // 今日・明日の日付情報を計算（JST対応）
+      const now = new Date()
+      const japanTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }))
+      
+      if (isTomorrow) {
+        japanTime.setDate(japanTime.getDate() + 1)
+      }
+      
+      const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][japanTime.getDay()]
+      
+      return {
+        day: japanTime.getDate(),
+        month: japanTime.getMonth() + 1,
+        dayOfWeek
+      }
+    }
+    
+    const dateInfo = getNoMenuDateInfo()
+    
     return (
-      <div className="min-h-[420px] flex items-center justify-center">
-        <div className="text-center">
-          {/* シンプルなシェフハットアイコン */}
-          <div className="mx-auto mb-8">
-            <ChefHat
-              className="w-20 h-20 text-gray-300 mx-auto"
-              strokeWidth={1}
-            />
+      <article
+        className={`
+          ${
+            dateInfo.dayOfWeek === '土' || dateInfo.dayOfWeek === '日'
+              ? 'bg-solarized-base3 border-solarized-yellow'
+              : 'bg-solarized-base3 border-solarized-base1'
+          }
+          rounded-2xl shadow-md hover:shadow-lg 
+          transition-all duration-300 transform hover:-translate-y-1 
+          border-2 overflow-hidden focus-within:ring-4 focus-within:ring-solarized-blue
+          flex flex-col min-h-[420px]
+        `}
+        role="article"
+        aria-label={`${dateInfo.month}月${dateInfo.day}日は給食がありません`}
+      >
+        {/* ヘッダー部分 */}
+        <div className="relative p-6 pb-4 flex-grow">
+          {/* 日付・曜日表示（一体化） - 高コントラスト・アクセシブル */}
+          <div className="flex items-center mb-6">
+            <div
+              className={`
+                ${
+                  isToday
+                    ? 'bg-solarized-green border-solarized-green'
+                    : 'bg-solarized-green border-solarized-green'
+                } 
+                text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
+              `}
+              role="img"
+              aria-label={`${isToday ? 'きょう ' : isTomorrow ? 'あす ' : ''}${dateInfo.month}月${dateInfo.day}日 ${dateInfo.dayOfWeek}曜日`}
+            >
+              {/* 今日・明日のラベル */}
+              {(isToday || isTomorrow) && (
+                <div className="text-sm font-bold bg-solarized-base3 text-solarized-green px-3 py-1 rounded-lg border-2 border-solarized-green">
+                  {isToday ? 'きょう' : 'あす'}
+                </div>
+              )}
+              <div className="text-center">
+                <div className="text-2xl font-bold">{dateInfo.day}日</div>
+              </div>
+              <div className="text-base font-bold">{dateInfo.dayOfWeek}曜日</div>
+            </div>
           </div>
 
-          {/* メインメッセージ */}
-          <h2 className="text-xl font-medium text-gray-600 mb-4">
-            今日は給食がありません
-          </h2>
+          {/* 給食なしメッセージ */}
+          <div className="flex-grow flex items-center justify-center">
+            <div className="text-center">
+              {/* シンプルなシェフハットアイコン */}
+              <div className="mx-auto mb-8">
+                <ChefHat
+                  className="w-20 h-20 text-gray-300 mx-auto"
+                  strokeWidth={1}
+                />
+              </div>
 
-          {/* サブメッセージ */}
-          <p className="text-base text-gray-400">
-            土日祝日や夏休み期間は給食がお休みです
-          </p>
+              {/* メインメッセージ */}
+              <h2 className="text-xl font-medium text-gray-600 mb-4">
+                土日祝日や夏休み・冬休み期間は給食がお休みです
+              </h2>
+            </div>
+          </div>
         </div>
-      </div>
+      </article>
     )
   }
 
   const dayColor = getDayColor(menu.dayOfWeek)
 
   // 日付フォーマット（JST対応）
-  const getDateParts = (dateStr) => {
+  const getDateParts = dateStr => {
     if (!dateStr) return { day: '?', month: '?' }
-    
+
     // YYYY-MM-DD形式の日付文字列をJSTで処理
     const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)
     if (dateMatch) {
       const [, year, month, day] = dateMatch
-      return { 
-        day: parseInt(day, 10), 
-        month: parseInt(month, 10) 
+      return {
+        day: parseInt(day, 10),
+        month: parseInt(month, 10),
       }
     }
-    
+
     // フォールバック：通常のDate処理
     const date = new Date(dateStr + 'T00:00:00+09:00') // JSTで解釈
-    return date.toString() === 'Invalid Date' 
+    return date.toString() === 'Invalid Date'
       ? { day: '?', month: '?' }
       : { day: date.getDate(), month: date.getMonth() + 1 }
   }
@@ -233,8 +331,6 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
     >
       {/* ヘッダー部分 */}
       <div className="relative p-6 pb-4 flex-grow">
-
-
         {/* 特別メニューバッジ - 高コントラスト */}
         {isSpecial && (
           <div className="absolute top-4 right-4">
@@ -250,9 +346,7 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
         )}
 
         {/* 日付・曜日表示（一体化） - 高コントラスト・アクセシブル */}
-        <div
-          className={`flex items-center mb-3 ${isSpecial ? 'mt-6' : ''}`}
-        >
+        <div className={`flex items-center mb-3 ${isSpecial ? 'mt-6' : ''}`}>
           <div
             className={`
               ${
@@ -263,12 +357,12 @@ const MenuCard = ({ debugDate, isToday = false, isTomorrow = false, menuData = n
               text-solarized-base3 rounded-xl px-6 py-2 shadow-lg border-2 flex items-center space-x-4
             `}
             role="img"
-            aria-label={`${isToday ? '今日 ' : isTomorrow ? '明日 ' : ''}${month}月${day}日 ${menu.dayOfWeek}曜日`}
+            aria-label={`${isToday ? 'きょう ' : isTomorrow ? 'あす ' : ''}${month}月${day}日 ${menu.dayOfWeek}曜日`}
           >
             {/* 今日・明日のラベル */}
             {(isToday || isTomorrow) && (
               <div className="text-sm font-bold bg-solarized-base3 text-solarized-green px-3 py-1 rounded-lg border-2 border-solarized-green">
-                {isToday ? '今日' : '明日'}
+                {isToday ? 'きょう' : 'あす'}
               </div>
             )}
             <div className="text-center">
